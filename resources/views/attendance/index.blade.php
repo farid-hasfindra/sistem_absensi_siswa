@@ -52,19 +52,24 @@
         let isScanning = false;
         let html5QrCode = null;
         let isCameraRunning = false;
+        
+        // Audio objects
+        const audioSuccess = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3'); // Simple ping
+        const audioError = new Audio('https://assets.mixkit.co/active_storage/sfx/2572/2572-preview.mp3'); // Error buzz
 
         function onScanSuccess(decodedText, decodedResult) {
             if(isScanning) return; 
             
+            console.log("Scan success:", decodedText);
             isScanning = true;
-            playSound('success'); 
             processScan(decodedText);
             
+            // Cooldown to prevent double scans
             setTimeout(() => { isScanning = false; }, 3000);
         }
 
         function onScanFailure(error) {
-            // ignore
+            // console.warn(`Code scan error = ${error}`);
         }
         
         document.addEventListener('DOMContentLoaded', function() {
@@ -80,17 +85,18 @@
         });
 
         function startCamera() {
-             const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+             // Config: Scan full frame (no qrbox), higher fps
+             const config = { fps: 15, qrbox: { width: 250, height: 250 } };
              document.getElementById('scanStatus').innerText = "Memulai kamera...";
              
-             // Show reader FIRST so library can attach video correctly
              document.getElementById('reader').classList.remove('d-none');
              document.getElementById('cameraPlaceholder').classList.add('d-none');
              
+             // Use exact config or undefined to let browser choose default camera first
              html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess, onScanFailure)
              .then(() => {
                  isCameraRunning = true;
-                 document.getElementById('scanStatus').innerText = "Arahkan kamera ke Barcode Siswa";
+                 document.getElementById('scanStatus').innerText = "Arahkan kamera ke Barcode Siswa. Pastikan cahaya cukup.";
                  
                  const btn = document.getElementById('toggleCameraBtn');
                  btn.innerHTML = '<i class="bi bi-camera-video-off me-2"></i> Matikan Kamera';
@@ -98,10 +104,20 @@
              })
              .catch(err => {
                  console.log("Error starting scanner", err);
-                 document.getElementById('scanStatus').innerText = "Gagal membuka kamera: " + err;
-                 // Revert visibility on error
-                 document.getElementById('reader').classList.add('d-none');
-                 document.getElementById('cameraPlaceholder').classList.remove('d-none');
+                 // Fallback: try without facingMode constraint (laptop webcams)
+                 html5QrCode.start({}, config, onScanSuccess, onScanFailure)
+                 .then(() => {
+                     isCameraRunning = true;
+                     document.getElementById('scanStatus').innerText = "Kamera Aktif (Mode Fallback)";
+                     const btn = document.getElementById('toggleCameraBtn');
+                     btn.innerHTML = '<i class="bi bi-camera-video-off me-2"></i> Matikan Kamera';
+                     btn.classList.replace('btn-outline-primary', 'btn-primary');
+                 })
+                 .catch(err2 => {
+                     document.getElementById('scanStatus').innerText = "Gagal membuka kamera: " + err2;
+                     document.getElementById('reader').classList.add('d-none');
+                     document.getElementById('cameraPlaceholder').classList.remove('d-none');
+                 });
              });
         }
 
@@ -134,11 +150,12 @@
                 .then(response => response.json())
                 .then(data => {
                     showResult(data);
-                    document.getElementById('scanStatus').innerHTML = "Siap scan berikutnya... <br><span class='text-primary'>Scan: " + code + "</span>";
+                    document.getElementById('scanStatus').innerHTML = "Siap scan berikutnya... <br><span class='text-primary'>Last Scan: " + code + "</span>";
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    document.getElementById('scanStatus').innerText = "Error Sistem";
+                    document.getElementById('scanStatus').innerText = "Error Sistem atau Koneksi";
+                    playSound('error');
                     isScanning = false; 
                 });
         }
@@ -168,7 +185,7 @@
                 scanMessage.className = 'alert alert-warning mt-3 mb-0';
                 scanMessage.innerText = data.message;
                 resultIcon.innerHTML = '<i class="bi bi-exclamation-circle-fill text-warning" style="font-size: 4rem;"></i>';
-                playSound('warning');
+                playSound('error');
             } else {
                 studentName.innerText = 'Unknown';
                 scanTime.innerText = '-';
@@ -185,7 +202,13 @@
         }
 
         function playSound(type) {
-             // Placeholder
+             if(type === 'success') {
+                 audioSuccess.currentTime = 0;
+                 audioSuccess.play().catch(e => console.log('Audio play failed', e));
+             } else {
+                 audioError.currentTime = 0;
+                 audioError.play().catch(e => console.log('Audio play failed', e));
+             }
         }
     </script>
     @endif

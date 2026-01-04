@@ -30,7 +30,20 @@
                             @forelse($students as $student)
                                 <tr>
                                     <td class="p-4">{{ $student->nis }}</td>
-                                    <td class="p-4 fw-bold">{{ $student->name }}</td>
+                                    <td class="p-4 fw-bold">
+                                        <div class="d-flex align-items-center">
+                                            @if($student->photo)
+                                            <img src="{{ asset('storage/' . $student->photo) }}" class="rounded-circle me-2 object-fit-cover shadow-sm" width="40" height="40">
+                                            @else
+                                            <div class="rounded-circle bg-light d-flex align-items-center justify-content-center me-2 border" style="width: 40px; height: 40px;">
+                                                <i class="bi bi-person text-secondary"></i>
+                                            </div>
+                                            @endif
+                                            <a href="{{ route('students.show', $student) }}" class="text-decoration-none text-dark hover-primary display-name">
+                                                {{ $student->name }}
+                                            </a>
+                                        </div>
+                                    </td>
                                     <td class="p-4">
                                         @if($student->schoolClass)
                                             <span
@@ -42,13 +55,26 @@
                                     <td class="p-4">
                                         {{ $student->parent->name ?? '-' }}
                                     </td>
-                                    <td class="p-4 text-muted">{{ $student->barcode_code }}</td>
+                                    <td class="p-4">
+                                        <!-- Clickable Container -->
+                                        <div class="barcode-container position-relative d-inline-block" 
+                                             style="cursor: pointer;"
+                                             data-code="{{ $student->barcode_code }}" 
+                                             data-name="{{ $student->name }}"
+                                             onclick="openBarcodeModal(this)">
+                                            <div class="barcode-list" data-value="{{ $student->barcode_code }}"></div>
+                                            <!-- Hover Overlay hint -->
+                                            <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-dark bg-opacity-25 opacity-0 hover-overlay transition-opacity rounded">
+                                                <i class="bi bi-arrows-fullscreen text-white"></i>
+                                            </div>
+                                        </div>
+                                    </td>
                                     <td class="p-4 text-end">
                                         <button class="btn btn-sm btn-light text-primary"
                                             onclick="showBarcode('{{ $student->barcode_code }}', '{{ $student->name }}')">
-                                            <i class="bi bi-qr-code"></i>
+                                            <i class="bi bi-zoom-in"></i>
                                         </button>
-                                        <button class="btn btn-sm btn-light text-warning" onclick="editStudent({{ $student }})">
+                                        <button class="btn btn-sm btn-light text-warning" onclick="editStudent(@json($student))">
                                             <i class="bi bi-pencil"></i>
                                         </button>
                                         <form action="{{ route('students.destroy', $student) }}" method="POST" class="d-inline"
@@ -87,9 +113,21 @@
                     <h5 class="modal-title fw-bold">Tambah Siswa Baru</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <form action="{{ route('students.store') }}" method="POST">
+                <form action="{{ route('students.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div class="modal-body">
+                        <div class="mb-3 text-center">
+                            <label class="form-label d-block fw-bold small text-secondary">Foto Siswa</label>
+                            <div class="image-upload-wrapper d-inline-block position-relative">
+                                <label for="photoUpload" class="cursor-pointer">
+                                    <div class="rounded-circle bg-light d-flex align-items-center justify-content-center border border-2 border-dashed shadow-sm hover-bg-light transition" style="width: 100px; height: 100px;">
+                                        <i class="bi bi-camera fs-3 text-muted" id="photoPreviewIcon"></i>
+                                        <img id="photoPreview" src="#" class="rounded-circle w-100 h-100 object-fit-cover d-none">
+                                    </div>
+                                </label>
+                                <input type="file" name="photo" id="photoUpload" class="d-none" accept="image/*" onchange="previewImage(this)">
+                            </div>
+                        </div>
                         <div class="mb-3">
                             <label class="form-label">NIS</label>
                             <input type="text" name="nis" class="form-control rounded-3" required>
@@ -137,14 +175,15 @@
                 <div class="modal-body text-center p-4">
                     <h5 class="fw-bold mb-1" id="barcodeName"></h5>
                     <p class="text-muted small mb-3">Scan kode ini</p>
-                    <div class="bg-white p-3 rounded border d-inline-block" id="printableArea">
-                        <svg id="barcodeDisplay"></svg>
-                        <br>
-                        <span id="barcodeText" class="fw-bold font-monospace"></span>
+                    <div class="bg-white p-3 rounded border d-inline-block shadow-sm" id="printableArea">
+                        <div id="barcodeDisplay" class="d-flex justify-content-center"></div>
                     </div>
-                    <div class="mt-4 d-grid">
-                        <button class="btn btn-outline-primary" onclick="printBarcode()">
-                            <i class="bi bi-printer me-2"></i> Cetak Barcode
+                    <div class="mt-4 d-grid gap-2">
+                        <button class="btn btn-primary" onclick="downloadBarcode()">
+                            <i class="bi bi-download me-2"></i> Download
+                        </button>
+                        <button class="btn btn-outline-secondary" onclick="printBarcode()">
+                            <i class="bi bi-printer me-2"></i> Cetak
                         </button>
                     </div>
                 </div>
@@ -155,44 +194,131 @@
 @endsection
 
 @section('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        .hover-overlay:hover {
+            opacity: 1 !important;
+        }
+        .transition-opacity {
+            transition: opacity 0.2s;
+        }
+    </style>
     <script>
-        function generateRandomCode() {
-            document.getElementById('barcodeInput').value = Math.random().toString(36).substr(2, 9).toUpperCase();
+        // Init barcodes in table
+        document.addEventListener("DOMContentLoaded", function() {
+            // Initialize QRs
+            document.querySelectorAll('.barcode-list').forEach(function(el) {
+                new QRCode(el, {
+                    text: el.dataset.value,
+                    width: 50,
+                    height: 50,
+                    colorDark : "#000000",
+                    colorLight : "#ffffff",
+                    correctLevel : QRCode.CorrectLevel.H
+                });
+            });
+        });
+
+        function openBarcodeModal(element) {
+            let code = element.getAttribute('data-code');
+            let name = element.getAttribute('data-name');
+            showBarcode(code, name); 
         }
 
         function showBarcode(code, name) {
             document.getElementById('barcodeName').innerText = name;
-            document.getElementById('barcodeText').innerText = code;
-            JsBarcode("#barcodeDisplay", code, {
-                format: "CODE128",
-                lineColor: "#000",
-                width: 2,
-                height: 50,
-                displayValue: false
+            
+            // Clear previous
+            const container = document.getElementById('barcodeDisplay');
+            container.innerHTML = '';
+            
+            // Generate New QR
+            new QRCode(container, {
+                text: code,
+                width: 200,
+                height: 200,
+                colorDark : "#000000",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
             });
+            
             new bootstrap.Modal(document.getElementById('barcodeModal')).show();
         }
 
-        function printBarcode() {
-            var printContents = document.getElementById('printableArea').innerHTML;
-            var name = document.getElementById('barcodeName').innerText;
-            var originalContents = document.body.innerHTML;
+        function downloadBarcode() {
+            const container = document.getElementById('barcodeDisplay');
+            let dataUrl = '';
+            const img = container.querySelector('img');
+            const canvas = container.querySelector('canvas');
+            
+            if (img && img.src) {
+                dataUrl = img.src;
+            } else if (canvas) {
+                dataUrl = canvas.toDataURL("image/png");
+            }
+            
+            if(dataUrl) {
+                const name = document.getElementById('barcodeName').innerText;
+                const lnk = document.createElement('a');
+                lnk.download = 'QR-' + name.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.png';
+                lnk.href = dataUrl;
+                document.body.appendChild(lnk);
+                lnk.click();
+                document.body.removeChild(lnk);
+            } else {
+                alert('Gambar sedang diproses, silakan coba sesaat lagi.');
+            }
+        }
 
-            var printWindow = window.open('', '', 'height=500,width=500');
-            printWindow.document.write('<html><head><title>Print Barcode - ' + name + '</title>');
-            printWindow.document.write('</head><body style="text-align:center; padding-top: 50px;">');
+        function printBarcode() {
+            const name = document.getElementById('barcodeName').innerText;
+            const container = document.getElementById('barcodeDisplay');
+            
+            let dataUrl = '';
+            const img = container.querySelector('img');
+            const canvas = container.querySelector('canvas');
+            
+            if (img && img.src) {
+                dataUrl = img.src;
+            } else if (canvas) {
+                dataUrl = canvas.toDataURL("image/png");
+            }
+            
+            if(!dataUrl) {
+                alert('Gambar sedang diproses...');
+                return;
+            }
+
+            var printWindow = window.open('', '', 'height=600,width=600');
+            printWindow.document.write('<html><head><title>Print QR Code - ' + name + '</title>');
+            printWindow.document.write('</head><body style="text-align:center; padding-top: 50px; font-family: sans-serif;">');
             printWindow.document.write('<h2>' + name + '</h2>');
-            printWindow.document.write(printContents);
+            printWindow.document.write('<img src="' + dataUrl + '" style="border: 1px solid #ddd; padding: 20px; width: 300px;">');
+            printWindow.document.write('<br><br><div style="font-size: 14px; font-weight: bold;">Sistem Absensi Siswa</div>');
             printWindow.document.write('</body></html>');
             printWindow.document.close();
-            printWindow.print();
+            
+            setTimeout(function() {
+                printWindow.focus();
+                printWindow.print();
+            }, 500);
         }
 
         function editStudent(student) {
-            // Simple edit implementation could use another modal or redirect
-            // For brevity/modern feel, let's keep it simple or impl strict edit mode later
-            alert("Edit feature for " + student.name + " to be implemented via filling a modal.");
+             // Simple edit implementation 
+            alert("Fitur Edit untuk " + student.name + " akan segera hadir.");
+        }
+
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('photoPreview').src = e.target.result;
+                    document.getElementById('photoPreview').classList.remove('d-none');
+                    document.getElementById('photoPreviewIcon').classList.add('d-none');
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
         }
     </script>
 @endsection

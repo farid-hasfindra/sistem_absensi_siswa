@@ -15,31 +15,30 @@ class StudentController extends Controller
         return view('students.index', compact('students', 'classes', 'parents'));
     }
 
+    public function show(Student $student)
+    {
+        return view('students.show', compact('student'));
+    }
+
     public function store(Request $request)
     {
-        $request->merge(['barcode_code' => $request->barcode_code ?? 'STU-' . uniqid()]); // Fallback/Auto logic if empty, but let's force auto.
-
-        // Actually, user said: "otomatis Barcode nya langsung dibuatkan", implies usually user doesn't input it.
-        // Let's generate it based on NIS or random if not present, but user might remove input field.
-        // Let's modify validation to remove barcode_code requirement from input if we generate it.
-
-        $code = 'STU-' . strtoupper(uniqid());
-        $request->merge(['barcode_code' => $code]);
+        $request->merge(['barcode_code' => $request->barcode_code ?? 'STU-' . strtoupper(uniqid())]);
 
         $request->validate([
             'nis' => 'required|unique:students',
             'name' => 'required',
             'class_id' => 'nullable|exists:classes,id',
             'parent_id' => 'nullable|exists:parents,id',
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
-        Student::create([
-            'nis' => $request->nis,
-            'name' => $request->name,
-            'class_id' => $request->class_id,
-            'parent_id' => $request->parent_id,
-            'barcode_code' => $code, // Force auto generated
-        ]);
+        $data = $request->except('photo');
+
+        if ($request->hasFile('photo')) {
+            $data['photo'] = $request->file('photo')->store('students', 'public');
+        }
+
+        Student::create($data);
 
         return back()->with('success', 'Siswa berhasil ditambahkan');
     }
@@ -51,16 +50,29 @@ class StudentController extends Controller
             'name' => 'required',
             'class_id' => 'nullable|exists:classes,id',
             'parent_id' => 'nullable|exists:parents,id',
-            'barcode_code' => 'required|unique:students,barcode_code,' . $student->id,
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
-        $student->update($request->all());
+        $data = $request->except('photo');
+
+        if ($request->hasFile('photo')) {
+            // Delete old photo if exists
+            if ($student->photo && \Illuminate\Support\Facades\Storage::exists('public/' . $student->photo)) {
+                \Illuminate\Support\Facades\Storage::delete('public/' . $student->photo);
+            }
+            $data['photo'] = $request->file('photo')->store('students', 'public');
+        }
+
+        $student->update($data);
 
         return back()->with('success', 'Data siswa berhasil diupdate');
     }
 
     public function destroy(Student $student)
     {
+        if ($student->photo && \Illuminate\Support\Facades\Storage::exists('public/' . $student->photo)) {
+            \Illuminate\Support\Facades\Storage::delete('public/' . $student->photo);
+        }
         $student->delete();
         return back()->with('success', 'Siswa berhasil dihapus');
     }

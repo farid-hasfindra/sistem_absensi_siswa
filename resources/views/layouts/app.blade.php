@@ -145,13 +145,16 @@
                         Akademik</div>
                 </li>
             @endif
-            <li class="nav-item">
-                <a href="{{ route('students.index') }}"
-                    class="nav-link {{ request()->routeIs('students.*') ? 'active' : '' }}">
-                    <i class="bi bi-people"></i>
-                    Data Siswa
-                </a>
-            </li>
+            @if(Auth::user()->role === 'admin')
+                <li class="nav-item">
+                    <a href="{{ route('students.index') }}"
+                        class="nav-link {{ request()->routeIs('students.*') ? 'active' : '' }}">
+                        <i class="bi bi-people"></i>
+                        Data Siswa
+                    </a>
+                </li>
+            @endif
+
             @if(Auth::user()->role === 'guru')
                 <li class="nav-item">
                     <a href="{{ route('attendance.index') }}"
@@ -161,13 +164,20 @@
                     </a>
                 </li>
             @endif
-            <li class="nav-item">
-                <a href="{{ route('reports.index') }}"
-                    class="nav-link {{ request()->routeIs('reports.*') ? 'active' : '' }}">
-                    <i class="bi bi-file-earmark-text"></i>
-                    Laporan
-                </a>
-            </li>
+
+            @if(in_array(Auth::user()->role, ['admin', 'guru', 'wali_murid']))
+                <li class="nav-item">
+                    <a href="{{ route('reports.index') }}"
+                        class="nav-link {{ request()->routeIs('reports.*') ? 'active' : '' }}">
+                        <i class="bi bi-file-earmark-text"></i>
+                        @if(Auth::user()->role == 'wali_murid')
+                            Riwayat Absensi
+                        @else
+                            Laporan
+                        @endif
+                    </a>
+                </li>
+            @endif
         </ul>
         <hr>
         <form action="{{ route('logout') }}" method="POST">
