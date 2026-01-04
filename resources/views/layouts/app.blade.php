@@ -152,13 +152,15 @@
                     Data Siswa
                 </a>
             </li>
-            <li class="nav-item">
-                <a href="{{ route('attendance.index') }}"
-                    class="nav-link {{ request()->routeIs('attendance.*') ? 'active' : '' }}">
-                    <i class="bi bi-qr-code-scan"></i>
-                    Scan Absensi
-                </a>
-            </li>
+            @if(Auth::user()->role === 'guru')
+                <li class="nav-item">
+                    <a href="{{ route('attendance.index') }}"
+                        class="nav-link {{ request()->routeIs('attendance.*') ? 'active' : '' }}">
+                        <i class="bi bi-qr-code-scan"></i>
+                        Scan Absensi
+                    </a>
+                </li>
+            @endif
             <li class="nav-item">
                 <a href="{{ route('reports.index') }}"
                     class="nav-link {{ request()->routeIs('reports.*') ? 'active' : '' }}">

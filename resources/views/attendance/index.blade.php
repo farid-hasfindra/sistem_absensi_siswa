@@ -2,21 +2,35 @@
 
 @section('content')
     <div class="row justify-content-center fade-in-up">
-        <div class="col-md-8 text-center">
+        <div class="col-md-6 text-center">
             <h2 class="fw-bold mb-4">Scan Absensi Barcode</h2>
 
-            <div class="card glass-card border-0 p-5 mb-4">
-                <div class="mb-4">
-                    <i class="bi bi-upc-scan" style="font-size: 5rem; color: #fff;"></i>
+            @if(Auth::user()->role === 'guru')
+                <div class="card border-0 shadow-lg rounded-4 overflow-hidden mb-4">
+                    <div class="card-body p-0 position-relative bg-black">
+                         <!-- Camera Viewport -->
+                        <div id="reader" class="d-none" style="width: 100%; min-height: 300px;"></div>
+                        <div id="cameraPlaceholder" class="d-flex align-items-center justify-content-center text-white" style="min-height: 300px;">
+                            <div class="text-center">
+                                <i class="bi bi-camera-video-off fs-1"></i>
+                                <p class="mt-2">Kamera Nonaktif</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-white border-0 p-3">
+                         <div id="scanStatus" class="fw-bold text-muted mb-3">Kamera dimatikan. Klik tombol untuk memulai.</div>
+                         
+                         <button id="toggleCameraBtn" class="btn btn-outline-primary rounded-pill px-4">
+                            <i class="bi bi-camera-video me-2"></i> Hidupkan Kamera
+                         </button>
+                    </div>
                 </div>
-                <h4 class="text-white mb-4">Silahkan Scan Barcode Kartu Siswa</h4>
-
-                <div class="input-group mb-3 justify-content-center">
-                    <input type="text" id="barcode" class="form-control form-control-lg text-center fw-bold rounded-pill"
-                        style="max-width: 400px;" placeholder="Memindai..." autofocus autocomplete="off">
+            @else
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    Fitur Scan Absensi hanya tersedia untuk Guru.
                 </div>
-                <p class="text-white-50 small">Kursor akan otomatis fokus pada input</p>
-            </div>
+            @endif
 
             <div id="resultCard" class="card border-0 shadow-sm rounded-4 d-none fade-in-up">
                 <div class="card-body p-4">
@@ -32,33 +46,83 @@
 @endsection
 
 @section('scripts')
+    @if(Auth::user()->role === 'guru')
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script>
-        const barcodeInput = document.getElementById('barcode');
+        let isScanning = false;
+        let html5QrCode = null;
+        let isCameraRunning = false;
 
-        // Auto focus
-        barcodeInput.focus();
-        document.addEventListener('click', () => barcodeInput.focus());
+        function onScanSuccess(decodedText, decodedResult) {
+            if(isScanning) return; 
+            
+            isScanning = true;
+            playSound('success'); 
+            processScan(decodedText);
+            
+            setTimeout(() => { isScanning = false; }, 3000);
+        }
 
-        barcodeInput.addEventListener('change', function () {
-            if (this.value.length > 3) {
-                processScan(this.value);
-                this.value = '';
-            }
+        function onScanFailure(error) {
+            // ignore
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+             html5QrCode = new Html5Qrcode("reader");
+             
+             document.getElementById('toggleCameraBtn').addEventListener('click', function() {
+                 if (isCameraRunning) {
+                     stopCamera();
+                 } else {
+                     startCamera();
+                 }
+             });
         });
 
-        // Handle Enter key manually if scanner doesn't trigger change
-        barcodeInput.addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') {
-                if (this.value.length > 3) {
-                    processScan(this.value);
-                    this.value = '';
-                }
-            }
-        });
+        function startCamera() {
+             const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+             document.getElementById('scanStatus').innerText = "Memulai kamera...";
+             
+             // Show reader FIRST so library can attach video correctly
+             document.getElementById('reader').classList.remove('d-none');
+             document.getElementById('cameraPlaceholder').classList.add('d-none');
+             
+             html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess, onScanFailure)
+             .then(() => {
+                 isCameraRunning = true;
+                 document.getElementById('scanStatus').innerText = "Arahkan kamera ke Barcode Siswa";
+                 
+                 const btn = document.getElementById('toggleCameraBtn');
+                 btn.innerHTML = '<i class="bi bi-camera-video-off me-2"></i> Matikan Kamera';
+                 btn.classList.replace('btn-outline-primary', 'btn-primary');
+             })
+             .catch(err => {
+                 console.log("Error starting scanner", err);
+                 document.getElementById('scanStatus').innerText = "Gagal membuka kamera: " + err;
+                 // Revert visibility on error
+                 document.getElementById('reader').classList.add('d-none');
+                 document.getElementById('cameraPlaceholder').classList.remove('d-none');
+             });
+        }
+
+        function stopCamera() {
+            html5QrCode.stop().then(() => {
+                isCameraRunning = false;
+                document.getElementById('scanStatus').innerText = "Kamera dimatikan";
+                document.getElementById('reader').classList.add('d-none');
+                document.getElementById('cameraPlaceholder').classList.remove('d-none');
+                
+                const btn = document.getElementById('toggleCameraBtn');
+                btn.innerHTML = '<i class="bi bi-camera-video me-2"></i> Hidupkan Kamera';
+                btn.classList.replace('btn-primary', 'btn-outline-primary');
+            }).catch(err => {
+                console.log("Failed to stop.", err);
+            });
+        }
 
         function processScan(code) {
-            // Show loading or visual feedback
-
+             document.getElementById('scanStatus').innerText = "Memproses: " + code;
+             
             fetch('{{ route("attendance.scan") }}', {
                 method: 'POST',
                 headers: {
@@ -70,10 +134,12 @@
                 .then(response => response.json())
                 .then(data => {
                     showResult(data);
+                    document.getElementById('scanStatus').innerHTML = "Siap scan berikutnya... <br><span class='text-primary'>Scan: " + code + "</span>";
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    Swal.fire('Error', 'Terjadi kesalahan sistem', 'error');
+                    document.getElementById('scanStatus').innerText = "Error Sistem";
+                    isScanning = false; 
                 });
         }
 
@@ -104,7 +170,6 @@
                 resultIcon.innerHTML = '<i class="bi bi-exclamation-circle-fill text-warning" style="font-size: 4rem;"></i>';
                 playSound('warning');
             } else {
-                // Error
                 studentName.innerText = 'Unknown';
                 scanTime.innerText = '-';
                 scanType.innerText = 'ERROR';
@@ -114,16 +179,14 @@
                 playSound('error');
             }
 
-            // Hide after 3 seconds
             setTimeout(() => {
                 resultCard.classList.add('d-none');
-            }, 4000);
+            }, 3000);
         }
 
         function playSound(type) {
-            // Optional: Implement simple beep
-            // let audio = new Audio('/sounds/' + type + '.mp3');
-            // audio.play().catch(e => console.log(e));
+             // Placeholder
         }
     </script>
+    @endif
 @endsection

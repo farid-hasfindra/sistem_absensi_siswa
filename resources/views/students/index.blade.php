@@ -116,14 +116,9 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Kode Barcode</label>
-                            <div class="input-group">
-                                <input type="text" name="barcode_code" id="barcodeInput"
-                                    class="form-control rounded-start-3" required>
-                                <button type="button" class="btn btn-outline-secondary"
-                                    onclick="generateRandomCode()">Acak</button>
-                            </div>
+                        <!-- Barcode Auto Generated -->
+                        <div class="alert alert-info small">
+                            <i class="bi bi-info-circle me-1"></i> Barcode akan digenerate otomatis oleh sistem.
                         </div>
                     </div>
                     <div class="modal-footer border-0">
@@ -142,12 +137,16 @@
                 <div class="modal-body text-center p-4">
                     <h5 class="fw-bold mb-1" id="barcodeName"></h5>
                     <p class="text-muted small mb-3">Scan kode ini</p>
-                    <div class="bg-white p-3 rounded border d-inline-block">
-                        <!-- We'll use a library or just display the code text for now, but user asked for Barcode app. 
-                                     Ideally use a JS library to render barcode. -->
+                    <div class="bg-white p-3 rounded border d-inline-block" id="printableArea">
                         <svg id="barcodeDisplay"></svg>
+                        <br>
+                        <span id="barcodeText" class="fw-bold font-monospace"></span>
                     </div>
-                    <h3 class="fw-mono mt-2" id="barcodeText"></h3>
+                    <div class="mt-4 d-grid">
+                        <button class="btn btn-outline-primary" onclick="printBarcode()">
+                            <i class="bi bi-printer me-2"></i> Cetak Barcode
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -173,6 +172,21 @@
                 displayValue: false
             });
             new bootstrap.Modal(document.getElementById('barcodeModal')).show();
+        }
+
+        function printBarcode() {
+            var printContents = document.getElementById('printableArea').innerHTML;
+            var name = document.getElementById('barcodeName').innerText;
+            var originalContents = document.body.innerHTML;
+
+            var printWindow = window.open('', '', 'height=500,width=500');
+            printWindow.document.write('<html><head><title>Print Barcode - ' + name + '</title>');
+            printWindow.document.write('</head><body style="text-align:center; padding-top: 50px;">');
+            printWindow.document.write('<h2>' + name + '</h2>');
+            printWindow.document.write(printContents);
+            printWindow.document.write('</body></html>');
+            printWindow.document.close();
+            printWindow.print();
         }
 
         function editStudent(student) {

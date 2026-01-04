@@ -17,15 +17,29 @@ class StudentController extends Controller
 
     public function store(Request $request)
     {
+        $request->merge(['barcode_code' => $request->barcode_code ?? 'STU-' . uniqid()]); // Fallback/Auto logic if empty, but let's force auto.
+
+        // Actually, user said: "otomatis Barcode nya langsung dibuatkan", implies usually user doesn't input it.
+        // Let's generate it based on NIS or random if not present, but user might remove input field.
+        // Let's modify validation to remove barcode_code requirement from input if we generate it.
+
+        $code = 'STU-' . strtoupper(uniqid());
+        $request->merge(['barcode_code' => $code]);
+
         $request->validate([
             'nis' => 'required|unique:students',
             'name' => 'required',
             'class_id' => 'nullable|exists:classes,id',
             'parent_id' => 'nullable|exists:parents,id',
-            'barcode_code' => 'required|unique:students',
         ]);
 
-        Student::create($request->all());
+        Student::create([
+            'nis' => $request->nis,
+            'name' => $request->name,
+            'class_id' => $request->class_id,
+            'parent_id' => $request->parent_id,
+            'barcode_code' => $code, // Force auto generated
+        ]);
 
         return back()->with('success', 'Siswa berhasil ditambahkan');
     }
