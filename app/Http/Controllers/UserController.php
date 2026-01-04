@@ -60,17 +60,26 @@ class UserController extends Controller
 
     public function update(Request $request, User $user)
     {
-        // Add update logic later if needed
+        $request->validate([
+            'name' => 'required',
+            'username' => 'required|unique:users,username,' . $user->id,
+            'password' => 'nullable|min:6',
+        ]);
+
         $user->update([
             'name' => $request->name,
             'username' => $request->username,
         ]);
+
         if ($request->filled('password')) {
             $user->update(['password' => Hash::make($request->password)]);
         }
 
         // Update profile
         if ($user->role == 'guru' && $user->teacher) {
+            $request->validate([
+                'nip' => 'required|unique:teachers,nip,' . $user->teacher->id,
+            ]);
             $user->teacher->update(['name' => $request->name, 'nip' => $request->nip]);
         }
         if ($user->role == 'wali_murid' && $user->parent) {

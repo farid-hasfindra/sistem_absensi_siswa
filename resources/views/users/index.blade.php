@@ -19,6 +19,17 @@
             </div>
         @endif
 
+        @if($errors->any())
+            <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm" role="alert">
+                <ul class="mb-0">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        @endif
+
         <div class="card border-0 shadow-soft">
             <div class="card-body p-0">
                 <div class="table-responsive">
@@ -39,9 +50,9 @@
                                     <td class="p-4">{{ $user->username }}</td>
                                     <td class="p-4">
                                         <span class="badge rounded-pill px-3 py-2 
-                                                                    @if($user->role == 'admin') bg-dark 
-                                                                    @elseif($user->role == 'guru') bg-primary 
-                                                                    @else bg-warning text-dark @endif">
+                                                                            @if($user->role == 'admin') bg-dark 
+                                                                            @elseif($user->role == 'guru') bg-primary 
+                                                                            @else bg-warning text-dark @endif">
                                             {{ ucfirst($user->role) }}
                                         </span>
                                     </td>
@@ -55,7 +66,8 @@
                                         @endif
                                     </td>
                                     <td class="p-4 text-end">
-                                        <button class="btn btn-sm btn-light text-warning me-1" onclick="editUser({{ $user->load('teacher', 'parent') }})">
+                                        <button class="btn btn-sm btn-light text-warning me-1"
+                                            onclick="editUser({{ $user->load('teacher', 'parent') }})">
                                             <i class="bi bi-pencil"></i>
                                         </button>
                                         <form action="{{ route('users.destroy', $user) }}" method="POST" class="d-inline"
@@ -169,15 +181,17 @@
                         <div class="mb-3">
                             <label class="form-label">Kata Sandi (Opsional)</label>
                             <div class="input-group">
-                                <input type="password" name="password" id="editPassword" class="form-control rounded-start-3" placeholder="Biarkan kosong jika tidak diubah">
-                                <button type="button" class="btn btn-outline-secondary" onclick="togglePassword('editPassword')">
+                                <input type="password" name="password" id="editPassword"
+                                    class="form-control rounded-start-3" placeholder="Biarkan kosong jika tidak diubah">
+                                <button type="button" class="btn btn-outline-secondary"
+                                    onclick="togglePassword('editPassword')">
                                     <i class="bi bi-eye"></i>
                                 </button>
                             </div>
                         </div>
 
                         <!-- Role Specific Fields (Read Only/Hidden logic if needed, but for now mostly name/username/password) -->
-                         <div id="editTeacherFields" class="d-none bg-light p-3 rounded-3 mb-3">
+                        <div id="editTeacherFields" class="d-none bg-light p-3 rounded-3 mb-3">
                             <h6 class="fw-bold mb-3 text-primary">Detail Guru</h6>
                             <div class="mb-3">
                                 <label class="form-label">NIP</label>
@@ -237,7 +251,7 @@
             document.getElementById('editUserForm').action = `/users/${user.id}`;
             document.getElementById('editName').value = user.name;
             document.getElementById('editUsername').value = user.username;
-            
+
             // Reset fields
             document.getElementById('editTeacherFields').classList.add('d-none');
             document.getElementById('editParentFields').classList.add('d-none');
@@ -250,7 +264,7 @@
                 document.getElementById('editPhone').value = user.parent.phone;
                 document.getElementById('editAddress').value = user.parent.address;
             }
-            
+
             new bootstrap.Modal(document.getElementById('editUserModal')).show();
         }
     </script>
