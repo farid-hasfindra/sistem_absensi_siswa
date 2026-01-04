@@ -6,6 +6,10 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\SchoolClassController;
+use App\Http\Controllers\SubjectController;
+use App\Http\Controllers\ScheduleController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -19,6 +23,12 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 // Protected Routes
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Admin Management
+    Route::resource('users', UserController::class);
+    Route::resource('classes', SchoolClassController::class)->parameters(['classes' => 'schoolClass']);
+    Route::resource('subjects', SubjectController::class);
+    Route::resource('schedules', ScheduleController::class);
 
     // Students
     Route::resource('students', StudentController::class);

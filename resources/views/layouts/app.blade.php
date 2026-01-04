@@ -5,28 +5,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $title ?? 'Dashboard' }} - Absensi Siswa</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @vite(['resources/css/app.scss', 'resources/js/app.js'])
     <style>
         .sidebar {
-            width: 280px;
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(10px);
-            border-right: 1px solid rgba(255, 255, 255, 0.3);
+            width: 260px;
+            background: #ffffff;
             min-height: 100vh;
             position: fixed;
             top: 0;
             left: 0;
             z-index: 1000;
+            border-right: 1px solid #eef2f5;
+            overflow-y: auto;
+            max-height: 100vh;
         }
 
         .main-content {
-            margin-left: 280px;
-            padding: 30px;
+            margin-left: 260px;
+            padding: 2rem;
+        }
+
+        /* Logo Area */
+        .sidebar-logo {
+            padding: 2rem 1.5rem;
+            display: flex;
+            align-items: center;
+            color: var(--primary-color);
         }
 
         .nav-link {
@@ -48,45 +56,95 @@
             box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
         }
 
-        .user-profile {
-            background: linear-gradient(to right, #667eea, #764ba2);
-            color: white;
-            padding: 20px;
-            border-radius: 15px;
-            margin-bottom: 30px;
+        .user-card {
+            background: #F8FAFC;
+            border-radius: 12px;
+            padding: 15px;
+            margin: 0 15px 20px 15px;
+            border: 1px solid #eef2f5;
         }
     </style>
 </head>
 
 <body>
     <!-- Sidebar -->
-    <div class="sidebar d-flex flex-column p-3">
-        <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-decoration-none p-3">
-            <span class="fs-4 fw-bold text-primary">Absensi<span class="text-dark">Siswa</span></span>
-        </a>
-        <hr>
-
-        <div class="user-profile mb-4 fade-in-up">
-            <div class="d-flex align-items-center gap-3">
-                <div class="bg-white rounded-circle d-flex align-items-center justify-content-center text-primary fw-bold"
-                    style="width: 40px; height: 40px;">
-                    {{ substr(Auth::user()->name ?? 'A', 0, 1) }}
+    <div class="sidebar d-flex flex-column">
+        <a href="/" class="sidebar-logo text-decoration-none">
+            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2"
+                style="width: 40px; height: 40px;">
+                <i class="bi bi-mortarboard-fill fs-5"></i>
+            </div>
+            <div>
+                <div class="fw-bold fs-5 text-dark" style="line-height: 1;">Edu<span class="text-primary">Scan</span>
                 </div>
-                <div>
-                    <div class="fw-bold">{{ Auth::user()->name ?? 'Guest' }}</div>
-                    <div style="font-size: 0.8rem; opacity: 0.8;">{{ ucfirst(Auth::user()->role ?? '') }}</div>
+                <div class="text-muted" style="font-size: 0.7rem;">School Attendance</div>
+            </div>
+        </a>
+
+        <div class="user-card d-flex align-items-center gap-3">
+            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold"
+                style="width: 35px; height: 35px;">
+                {{ substr(Auth::user()->name ?? 'A', 0, 1) }}
+            </div>
+            <div style="overflow: hidden;">
+                <div class="fw-bold text-dark text-truncate" style="font-size: 0.9rem;">
+                    {{ Auth::user()->name ?? 'Tamu' }}
+                </div>
+                <div class="text-muted" style="font-size: 0.75rem;">
+                    @if(Auth::user()->role == 'admin') Administrator
+                    @elseif(Auth::user()->role == 'guru') Guru
+                    @else Wali Murid @endif
                 </div>
             </div>
         </div>
 
-        <ul class="nav nav-pills flex-column mb-auto fade-in-up" style="animation-delay: 0.1s;">
+        <ul class="nav flex-column mb-auto">
             <li class="nav-item">
                 <a href="{{ route('dashboard') }}"
                     class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                    <i class="bi bi-speedometer2"></i>
+                    <i class="bi bi-grid-fill me-2"></i>
                     Dashboard
                 </a>
             </li>
+
+            @if(Auth::user()->role === 'admin')
+                <li class="nav-item mt-3">
+                    <div class="text-uppercase text-muted ps-3 mb-2" style="font-size: 0.7rem; letter-spacing: 1px;">
+                        Administrasi</div>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('users.index') }}"
+                        class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}">
+                        <i class="bi bi-people-fill me-2"></i>
+                        Pengguna
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('classes.index') }}"
+                        class="nav-link {{ request()->routeIs('classes.*') ? 'active' : '' }}">
+                        <i class="bi bi-building-fill me-2"></i>
+                        Kelas
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('subjects.index') }}"
+                        class="nav-link {{ request()->routeIs('subjects.*') ? 'active' : '' }}">
+                        <i class="bi bi-book-half me-2"></i>
+                        Mata Pelajaran
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('schedules.index') }}"
+                        class="nav-link {{ request()->routeIs('schedules.*') ? 'active' : '' }}">
+                        <i class="bi bi-calendar-range-fill me-2"></i>
+                        Jadwal Pelajaran
+                    </a>
+                </li>
+                <li class="nav-item mt-3">
+                    <div class="text-uppercase text-muted ps-3 mb-2" style="font-size: 0.7rem; letter-spacing: 1px;">
+                        Akademik</div>
+                </li>
+            @endif
             <li class="nav-item">
                 <a href="{{ route('students.index') }}"
                     class="nav-link {{ request()->routeIs('students.*') ? 'active' : '' }}">
@@ -114,7 +172,7 @@
             @csrf
             <button type="submit" class="nav-link w-100 border-0 bg-transparent text-danger">
                 <i class="bi bi-box-arrow-right"></i>
-                Sign out
+                Keluar
             </button>
         </form>
     </div>

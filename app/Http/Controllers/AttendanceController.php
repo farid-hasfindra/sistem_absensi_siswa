@@ -32,7 +32,8 @@ class AttendanceController extends Controller
 
         if ($hour >= 6 && $hour < 11) {
             $type = 'pagi';
-            if ($hour > 7) $status = 'telat'; // Example late time
+            if ($hour > 7)
+                $status = 'telat'; // Example late time
         } elseif ($hour >= 11 && $hour < 14) {
             $type = 'solat';
         } elseif ($hour >= 14) {
@@ -74,3 +75,5 @@ class AttendanceController extends Controller
             'time' => $now->format('H:i:s')
         ]);
     }
+}
+

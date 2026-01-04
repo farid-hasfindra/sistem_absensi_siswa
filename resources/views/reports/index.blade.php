@@ -5,11 +5,11 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
                 <h2 class="fw-bold">Laporan Absensi</h2>
-                <p class="text-muted">View and export attendance history</p>
+                <p class="text-muted">Lihat dan ekspor riwayat absensi</p>
             </div>
             <div>
                 <a href="{{ route('reports.export') }}" class="btn btn-success text-white">
-                    <i class="bi bi-file-earmark-excel"></i> Export Excel
+                    <i class="bi bi-file-earmark-excel"></i> Ekspor Excel
                 </a>
             </div>
         </div>
@@ -18,7 +18,7 @@
             <div class="card-body p-4">
                 <form action="{{ route('reports.index') }}" method="GET" class="row g-3">
                     <div class="col-md-4">
-                        <label class="form-label fw-bold">Filter Date</label>
+                        <label class="form-label fw-bold">Filter Tanggal</label>
                         <input type="date" name="date" class="form-control" value="{{ $date }}">
                     </div>
                     <div class="col-md-2 d-flex align-items-end">
@@ -34,12 +34,12 @@
                     <table class="table table-hover align-middle mb-0">
                         <thead class="bg-light">
                             <tr>
-                                <th class="p-4 border-0 rounded-top-start">Time</th>
-                                <th class="p-4 border-0">Student Name</th>
-                                <th class="p-4 border-0">Class</th>
-                                <th class="p-4 border-0">Type</th>
+                                <th class="p-4 border-0 rounded-top-start">Waktu</th>
+                                <th class="p-4 border-0">Nama Siswa</th>
+                                <th class="p-4 border-0">Kelas</th>
+                                <th class="p-4 border-0">Tipe</th>
                                 <th class="p-4 border-0">Status</th>
-                                <th class="p-4 border-0 rounded-top-end">Date</th>
+                                <th class="p-4 border-0 rounded-top-end">Tanggal</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -75,8 +75,8 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" class="p-5 text-center text-muted">No attendance records found for this
-                                        date.</td>
+                                    <td colspan="6" class="p-5 text-center text-muted">Tidak ada data absensi untuk tanggal ini.
+                                    </td>
                                 </tr>
                             @endforelse
                         </tbody>

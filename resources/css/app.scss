@@ -1,54 +1,94 @@
 @import 'bootstrap/scss/bootstrap';
 
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+
 :root {
-    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    --secondary-gradient: linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%);
-    --glass-bg: rgba(255, 255, 255, 0.25);
-    --glass-border: rgba(255, 255, 255, 0.18);
-    --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    --primary-color: #4A90E2;
+    /* Friendly Blue */
+    --secondary-color: #F5A623;
+    /* Pencil Yellow/Orange */
+    --success-color: #7ED321;
+    /* Grass/Chalkboard Green */
+    --info-color: #50E3C2;
+    /* Teal */
+    --danger-color: #FF5A5F;
+    /* Soft Red */
+    --background-color: #F0F4F8;
+    --card-bg: #FFFFFF;
+    --text-color: #2c3e50;
+    --border-radius-lg: 15px;
+    --border-radius-sm: 8px;
+    --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.05);
 }
 
 body {
-    background: #f3f4f6;
-    font-family: 'Poppins', sans-serif;
+    background-color: var(--background-color);
+    font-family: 'Nunito', sans-serif;
+    /* Friendly rounded font */
+    color: var(--text-color);
     min-height: 100vh;
-    overflow-x: hidden;
+    background-image: radial-gradient(#e0e7ff 1px, transparent 1px);
+    background-size: 20px 20px;
 }
 
 .bg-animated {
-    background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
-    background-size: 400% 400%;
-    animation: gradient 15s ease infinite;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -1;
+    display: none;
+    /* Disable previous animated gradient */
 }
 
-@keyframes gradient {
-    0% {
-        background-position: 0% 50%;
-    }
+.card {
+    border: none;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-soft);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
 
-    50% {
-        background-position: 100% 50%;
-    }
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    /* Lift effect */
+}
 
-    100% {
-        background-position: 0% 50%;
-    }
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    border-radius: var(--border-radius-sm);
+    font-weight: 700;
+    padding: 10px 20px;
+}
+
+.btn-primary:hover {
+    background-color: darken(#4A90E2, 10%);
+    border-color: darken(#4A90E2, 10%);
+}
+
+.sidebar {
+    background: #FFFFFF !important;
+    border-right: 1px solid #E1E8ED;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.02);
+}
+
+.sidebar .nav-link {
+    color: #5b6f82 !important;
+    font-weight: 600;
+    border-radius: 10px;
+    margin: 5px 10px;
+    transition: all 0.2s ease;
+}
+
+.sidebar .nav-link:hover,
+.sidebar .nav-link.active {
+    background-color: #E3F2FD !important;
+    /* Light Blue var */
+    color: var(--primary-color) !important;
 }
 
 .glass-card {
-    background: var(--glass-bg);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-radius: 20px;
-    border: 1px solid var(--glass-border);
-    box-shadow: var(--glass-shadow);
-    color: white;
+    /* Retain structure but reset style for academic look */
+    background: white;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-soft);
+    border: 1px solid #f0f0f0;
 }
 
 .glass-card .form-control {
