@@ -8,8 +8,18 @@
             @if(Auth::user()->role === 'guru')
                 <div class="card border-0 shadow-lg rounded-4 overflow-hidden mb-4">
                     <div class="card-body p-0 position-relative bg-black">
-                         <!-- Camera Viewport -->
-                        <div id="reader" class="d-none" style="width: 100%; min-height: 300px;"></div>
+                        <!-- Camera Viewport -->
+                        <div class="position-relative">
+                            <div id="reader" class="d-none" style="width: 100%; min-height: 300px; background: black;"></div>
+                            
+                            <!-- Scanning Animation Overlay -->
+                            <div id="scanOverlay" class="position-absolute top-0 start-0 w-100 h-100 d-none d-flex flex-column align-items-center justify-content-center" 
+                                 style="background: rgba(0,0,0,0.3); z-index: 10;">
+                                <div class="scan-line"></div>
+                                <div class="text-white fw-bold mt-3 text-shadow">Sedang Membaca...</div>
+                            </div>
+                        </div>
+
                         <div id="cameraPlaceholder" class="d-flex align-items-center justify-content-center text-white" style="min-height: 300px;">
                             <div class="text-center">
                                 <i class="bi bi-camera-video-off fs-1"></i>
@@ -18,9 +28,10 @@
                         </div>
                     </div>
                     <div class="card-footer bg-white border-0 p-3">
-                         <div id="scanStatus" class="fw-bold text-muted mb-3">Kamera dimatikan. Klik tombol untuk memulai.</div>
+                         <!-- Removed previous status text to keep it clean -->
+                         <div id="scanStatus" class="fw-bold text-muted small">Siap Scan</div>
                          
-                         <button id="toggleCameraBtn" class="btn btn-outline-primary rounded-pill px-4">
+                         <button id="toggleCameraBtn" class="btn btn-outline-primary rounded-pill px-4 mt-2">
                             <i class="bi bi-camera-video me-2"></i> Hidupkan Kamera
                          </button>
                     </div>
@@ -31,16 +42,6 @@
                     Fitur Scan Absensi hanya tersedia untuk Guru.
                 </div>
             @endif
-
-            <div id="resultCard" class="card border-0 shadow-sm rounded-4 d-none fade-in-up">
-                <div class="card-body p-4">
-                    <div id="resultIcon" class="mb-2"></div>
-                    <h3 class="fw-bold mb-1" id="studentName"></h3>
-                    <h5 class="text-muted" id="scanTime"></h5>
-                    <div class="badge bg-primary fs-6 mt-2" id="scanType"></div>
-                    <div class="alert mt-3 mb-0" id="scanMessage"></div>
-                </div>
-            </div>
         </div>
     </div>
 @endsection
@@ -48,28 +49,58 @@
 @section('scripts')
     @if(Auth::user()->role === 'guru')
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <style>
+        .scan-line {
+            width: 80%;
+            height: 4px;
+            background: #0d6efd;
+            box-shadow: 0 0 10px #0d6efd;
+            animation: scan 1.5s infinite linear;
+            border-radius: 50%;
+        }
+        @keyframes scan {
+            0% { transform: translateY(-50px); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(50px); opacity: 0; }
+        }
+        .text-shadow { text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+        /* Mirror the video to make aiming natural */
+        #reader video {
+            transform: scaleX(-1) !important;
+        }
+    </style>
     <script>
         let isScanning = false;
         let html5QrCode = null;
         let isCameraRunning = false;
+        const storageBaseUrl = "{{ asset('storage') }}/";
         
         // Audio objects
-        const audioSuccess = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3'); // Simple ping
-        const audioError = new Audio('https://assets.mixkit.co/active_storage/sfx/2572/2572-preview.mp3'); // Error buzz
+        const audioSuccess = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3'); 
+        const audioError = new Audio('https://assets.mixkit.co/active_storage/sfx/2572/2572-preview.mp3'); 
 
         function onScanSuccess(decodedText, decodedResult) {
             if(isScanning) return; 
-            
-            console.log("Scan success:", decodedText);
             isScanning = true;
-            processScan(decodedText);
-            
-            // Cooldown to prevent double scans
-            setTimeout(() => { isScanning = false; }, 3000);
+
+            // 1. FREEZE Camera (Capture effect)
+            if(html5QrCode.getState() === Html5QrcodeScannerState.SCANNING) {
+                html5QrCode.pause(true); 
+            }
+
+            // 2. Show Scanning Animation
+            document.getElementById('scanOverlay').classList.remove('d-none');
+            document.getElementById('scanStatus').innerText = "Mendeteksi Siswa...";
+
+            // 3. Process after a brief visual delay (feeling of "reading")
+            setTimeout(() => {
+                processScan(decodedText);
+            }, 800); 
         }
 
         function onScanFailure(error) {
-            // console.warn(`Code scan error = ${error}`);
+            // ignore
         }
         
         document.addEventListener('DOMContentLoaded', function() {
@@ -85,18 +116,17 @@
         });
 
         function startCamera() {
-             // Config: Scan full frame (no qrbox), higher fps
-             const config = { fps: 15, qrbox: { width: 250, height: 250 } };
+             // Higher FPS for faster detection
+             const config = { fps: 30, qrbox: { width: 250, height: 250 } };
              document.getElementById('scanStatus').innerText = "Memulai kamera...";
              
              document.getElementById('reader').classList.remove('d-none');
              document.getElementById('cameraPlaceholder').classList.add('d-none');
              
-             // Use exact config or undefined to let browser choose default camera first
              html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess, onScanFailure)
              .then(() => {
                  isCameraRunning = true;
-                 document.getElementById('scanStatus').innerText = "Arahkan kamera ke Barcode Siswa. Pastikan cahaya cukup.";
+                 document.getElementById('scanStatus').innerText = "Kamera Aktif";
                  
                  const btn = document.getElementById('toggleCameraBtn');
                  btn.innerHTML = '<i class="bi bi-camera-video-off me-2"></i> Matikan Kamera';
@@ -104,19 +134,17 @@
              })
              .catch(err => {
                  console.log("Error starting scanner", err);
-                 // Fallback: try without facingMode constraint (laptop webcams)
+                 // Fallback config
                  html5QrCode.start({}, config, onScanSuccess, onScanFailure)
                  .then(() => {
                      isCameraRunning = true;
-                     document.getElementById('scanStatus').innerText = "Kamera Aktif (Mode Fallback)";
+                     document.getElementById('scanStatus').innerText = "Kamera Aktif (Fallback)";
                      const btn = document.getElementById('toggleCameraBtn');
                      btn.innerHTML = '<i class="bi bi-camera-video-off me-2"></i> Matikan Kamera';
                      btn.classList.replace('btn-outline-primary', 'btn-primary');
                  })
                  .catch(err2 => {
-                     document.getElementById('scanStatus').innerText = "Gagal membuka kamera: " + err2;
-                     document.getElementById('reader').classList.add('d-none');
-                     document.getElementById('cameraPlaceholder').classList.remove('d-none');
+                     document.getElementById('scanStatus').innerText = "Error: " + err2;
                  });
              });
         }
@@ -127,6 +155,7 @@
                 document.getElementById('scanStatus').innerText = "Kamera dimatikan";
                 document.getElementById('reader').classList.add('d-none');
                 document.getElementById('cameraPlaceholder').classList.remove('d-none');
+                document.getElementById('scanOverlay').classList.add('d-none');
                 
                 const btn = document.getElementById('toggleCameraBtn');
                 btn.innerHTML = '<i class="bi bi-camera-video me-2"></i> Hidupkan Kamera';
@@ -137,8 +166,6 @@
         }
 
         function processScan(code) {
-             document.getElementById('scanStatus').innerText = "Memproses: " + code;
-             
             fetch('{{ route("attendance.scan") }}', {
                 method: 'POST',
                 headers: {
@@ -149,65 +176,92 @@
             })
                 .then(response => response.json())
                 .then(data => {
+                    document.getElementById('scanOverlay').classList.add('d-none'); // Hide anim
                     showResult(data);
-                    document.getElementById('scanStatus').innerHTML = "Siap scan berikutnya... <br><span class='text-primary'>Last Scan: " + code + "</span>";
                 })
                 .catch(error => {
+                    document.getElementById('scanOverlay').classList.add('d-none');
                     console.error('Error:', error);
-                    document.getElementById('scanStatus').innerText = "Error Sistem atau Koneksi";
                     playSound('error');
-                    isScanning = false; 
+                    
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error Sistem',
+                        text: 'Gagal memproses data.',
+                        timer: 2000,
+                        showConfirmButton: false
+                    }).then(() => {
+                        resumeScanning();
+                    });
                 });
         }
 
         function showResult(data) {
-            const resultCard = document.getElementById('resultCard');
-            const studentName = document.getElementById('studentName');
-            const scanTime = document.getElementById('scanTime');
-            const scanType = document.getElementById('scanType');
-            const scanMessage = document.getElementById('scanMessage');
-            const resultIcon = document.getElementById('resultIcon');
-
-            resultCard.classList.remove('d-none');
-
             if (data.status === 'success') {
-                studentName.innerText = data.student.name;
-                scanTime.innerText = data.time;
-                scanType.innerText = data.type.toUpperCase();
-                scanMessage.className = 'alert alert-success mt-3 mb-0';
-                scanMessage.innerText = data.message;
-                resultIcon.innerHTML = '<i class="bi bi-check-circle-fill text-success" style="font-size: 4rem;"></i>';
                 playSound('success');
-            } else if (data.status === 'warning') {
-                studentName.innerText = data.student.name;
-                scanTime.innerText = new Date().toLocaleTimeString();
-                scanType.innerText = 'DUPLICATE';
-                scanMessage.className = 'alert alert-warning mt-3 mb-0';
-                scanMessage.innerText = data.message;
-                resultIcon.innerHTML = '<i class="bi bi-exclamation-circle-fill text-warning" style="font-size: 4rem;"></i>';
-                playSound('error');
-            } else {
-                studentName.innerText = 'Unknown';
-                scanTime.innerText = '-';
-                scanType.innerText = 'ERROR';
-                scanMessage.className = 'alert alert-danger mt-3 mb-0';
-                scanMessage.innerText = data.message;
-                resultIcon.innerHTML = '<i class="bi bi-x-circle-fill text-danger" style="font-size: 4rem;"></i>';
-                playSound('error');
-            }
+                
+                let imageUrl = null;
+                if(data.student && data.student.photo) {
+                    imageUrl = storageBaseUrl + data.student.photo;
+                }
 
-            setTimeout(() => {
-                resultCard.classList.add('d-none');
-            }, 3000);
+                Swal.fire({
+                    title: data.student.name,
+                    html: `<div class="fs-4 mb-2">Absen <b>${data.type.toUpperCase()}</b></div>
+                           <div class="text-muted"><i class="bi bi-clock me-1"></i> ${data.time}</div>`,
+                    icon: 'success',
+                    imageUrl: imageUrl,
+                    imageWidth: 120,
+                    imageHeight: 120,
+                    imageAlt: 'Foto Siswa',
+                    imageClass: 'rounded-circle shadow border border-3 border-success',
+                    timer: 3000, // Show for 3 sec
+                    showConfirmButton: false,
+                    backdrop: `rgba(0,0,0,0.4)`
+                }).then(() => {
+                    resumeScanning();
+                });
+                
+            } else if (data.status === 'warning') {
+                playSound('error');
+                Swal.fire({
+                    title: 'Peringatan',
+                    text: data.message,
+                    icon: 'warning',
+                    timer: 2000,
+                    showConfirmButton: false
+                }).then(() => {
+                    resumeScanning();
+                });
+            } else {
+                playSound('error');
+                Swal.fire({
+                    title: 'Gagal',
+                    text: data.message,
+                    icon: 'error',
+                    timer: 2000,
+                    showConfirmButton: false
+                }).then(() => {
+                    resumeScanning();
+                });
+            }
+        }
+
+        function resumeScanning() {
+             isScanning = false;
+             document.getElementById('scanStatus').innerText = "Siap scan berikutnya...";
+             if(html5QrCode && html5QrCode.getState() === Html5QrcodeScannerState.PAUSED) {
+                 html5QrCode.resume();
+             }
         }
 
         function playSound(type) {
              if(type === 'success') {
                  audioSuccess.currentTime = 0;
-                 audioSuccess.play().catch(e => console.log('Audio play failed', e));
+                 audioSuccess.play().catch(e => console.log('Audio error', e));
              } else {
                  audioError.currentTime = 0;
-                 audioError.play().catch(e => console.log('Audio play failed', e));
+                 audioError.play().catch(e => console.log('Audio error', e));
              }
         }
     </script>
