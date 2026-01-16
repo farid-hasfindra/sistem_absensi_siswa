@@ -94,43 +94,69 @@
                                 </div>
                             </div>
 
+                            <!-- QR Tab -->
+                            <div class="tab-pane fade" id="pills-qr" role="tabpanel">
+                                <div class="text-center mt-3">
                                     <!-- ID Card Container -->
-                                    <div class="id-card-wrapper d-inline-block position-relative shadow-lg rounded-4 overflow-hidden mb-4" id="printableArea" style="width: 320px; background: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+                                    <div class="id-card-wrapper d-inline-block position-relative shadow-lg rounded-4 overflow-hidden mb-4"
+                                        id="printableArea"
+                                        style="width: 320px; background: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
                                         <!-- Modern Header with curve -->
-                                        <div class="card-header-bg p-4 text-white text-center position-relative" style="background: linear-gradient(135deg, #0056b3 0%, #004494 100%); padding-bottom: 2rem !important; -webkit-print-color-adjust: exact;">
-                                            <div class="d-flex align-items-center justify-content-center flex-column position-relative z-1">
-                                                <div class="bg-white p-2 rounded-circle shadow-sm mb-2 d-flex align-items-center justify-content-center" style="width: 65px; height: 65px;">
-                                                    <img src="{{ asset('logo_sekolah.jpg') }}" class="img-fluid" style="max-height: 50px;">
+                                        <div class="card-header-bg p-4 text-white text-center position-relative"
+                                            style="background: linear-gradient(135deg, #0056b3 0%, #004494 100%); padding-bottom: 2rem !important; -webkit-print-color-adjust: exact;">
+                                            <div
+                                                class="d-flex align-items-center justify-content-center flex-column position-relative z-1">
+                                                <div class="bg-white p-2 rounded-circle shadow-sm mb-2 d-flex align-items-center justify-content-center"
+                                                    style="width: 65px; height: 65px;">
+                                                    <img src="{{ asset('logo_sekolah.jpg') }}" class="img-fluid"
+                                                        style="max-height: 50px;">
                                                 </div>
-                                                <div class="fw-bold" style="font-size: 14px; letter-spacing: 0.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.2); line-height: 1.2;">
+                                                <div class="fw-bold"
+                                                    style="font-size: 14px; letter-spacing: 0.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.2); line-height: 1.2;">
                                                     SMP NEGERI 1 <br> PANGKALAN KOTO BARU
                                                 </div>
                                             </div>
                                             <!-- Decorative curve -->
-                                            <div style="position: absolute; bottom: 0; left: 0; width: 100%; height: 20px; background: #fff; border-top-left-radius: 50% 100%; border-top-right-radius: 50% 100%;"></div>
+                                            <div
+                                                style="position: absolute; bottom: 0; left: 0; width: 100%; height: 20px; background: #fff; border-top-left-radius: 50% 100%; border-top-right-radius: 50% 100%;">
+                                            </div>
                                         </div>
-                                        
+
                                         <!-- Body -->
                                         <div class="card-body bg-white px-4 pb-4 pt-1 position-relative text-center">
-                                            
-                                            <h3 class="fw-bolder text-dark mb-1" style="color: #003366 !important;">{{ $student->name }}</h3>
-                                            <div class="text-muted small fw-bold text-uppercase letter-spacing-2 mb-3">Siswa / Student</div>
 
-                                            <div class="qr-wrapper p-3 border rounded-4 d-inline-block bg-white shadow-sm mb-3 position-relative">
+                                            <h3 class="fw-bolder text-dark mb-1" style="color: #003366 !important;">
+                                                {{ $student->name }}</h3>
+                                            <div class="text-muted small fw-bold text-uppercase letter-spacing-2 mb-3">Siswa
+                                                / Student</div>
+
+                                            <div
+                                                class="qr-wrapper p-3 border rounded-4 d-inline-block bg-white shadow-sm mb-3 position-relative">
                                                 <!-- Corner accents -->
-                                                <div style="position: absolute; top: 10px; left: 10px; width: 15px; height: 15px; border-top: 3px solid #0056b3; border-left: 3px solid #0056b3; border-top-left-radius: 4px;"></div>
-                                                <div style="position: absolute; top: 10px; right: 10px; width: 15px; height: 15px; border-top: 3px solid #0056b3; border-right: 3px solid #0056b3; border-top-right-radius: 4px;"></div>
-                                                <div style="position: absolute; bottom: 10px; left: 10px; width: 15px; height: 15px; border-bottom: 3px solid #0056b3; border-left: 3px solid #0056b3; border-bottom-left-radius: 4px;"></div>
-                                                <div style="position: absolute; bottom: 10px; right: 10px; width: 15px; height: 15px; border-bottom: 3px solid #0056b3; border-right: 3px solid #0056b3; border-bottom-right-radius: 4px;"></div>
-                                                
+                                                <div
+                                                    style="position: absolute; top: 10px; left: 10px; width: 15px; height: 15px; border-top: 3px solid #0056b3; border-left: 3px solid #0056b3; border-top-left-radius: 4px;">
+                                                </div>
+                                                <div
+                                                    style="position: absolute; top: 10px; right: 10px; width: 15px; height: 15px; border-top: 3px solid #0056b3; border-right: 3px solid #0056b3; border-top-right-radius: 4px;">
+                                                </div>
+                                                <div
+                                                    style="position: absolute; bottom: 10px; left: 10px; width: 15px; height: 15px; border-bottom: 3px solid #0056b3; border-left: 3px solid #0056b3; border-bottom-left-radius: 4px;">
+                                                </div>
+                                                <div
+                                                    style="position: absolute; bottom: 10px; right: 10px; width: 15px; height: 15px; border-bottom: 3px solid #0056b3; border-right: 3px solid #0056b3; border-bottom-right-radius: 4px;">
+                                                </div>
+
                                                 <div id="barcodeDisplay" class="m-1"></div>
                                             </div>
 
-                                            <div class="fw-bold fs-5 text-secondary inter-font" style="letter-spacing: 2px; color: #555;">{{ $student->nis }}</div>
+                                            <div class="fw-bold fs-5 text-secondary inter-font"
+                                                style="letter-spacing: 2px; color: #555;">{{ $student->nis }}</div>
                                         </div>
-                                        
+
                                         <!-- Footer decoration -->
-                                        <div class="card-footer-line" style="height: 6px; background: linear-gradient(90deg, #0056b3 0%, #00aaff 100%);"></div>
+                                        <div class="card-footer-line"
+                                            style="height: 6px; background: linear-gradient(90deg, #0056b3 0%, #00aaff 100%);">
+                                        </div>
                                     </div>
 
                                     <div class="d-flex justify-content-center gap-3 d-print-none">
@@ -170,10 +196,10 @@
 
         function downloadCard() {
             const cardElement = document.getElementById('printableArea');
-            
+
             html2canvas(cardElement, {
-                scale: 3, 
-                useCORS: true, 
+                scale: 3,
+                useCORS: true,
                 backgroundColor: null
             }).then(canvas => {
                 const link = document.createElement('a');
@@ -186,7 +212,7 @@
         function printCard() {
             const container = document.getElementById('printableArea');
             const printWindow = window.open('', '', 'height=800,width=800');
-            
+
             printWindow.document.write('<html><head><title>Cetak Kartu Siswa</title>');
             printWindow.document.write('<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">');
             printWindow.document.write('<style>');
@@ -198,7 +224,7 @@
             printWindow.document.write(container.outerHTML);
             printWindow.document.write('</body></html>');
             printWindow.document.close();
-            
+
             setTimeout(() => {
                 printWindow.focus();
                 printWindow.print();
