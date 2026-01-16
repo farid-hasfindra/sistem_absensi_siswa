@@ -61,46 +61,178 @@
                                     data-bs-toggle="pill" data-bs-target="#pills-info" type="button">Data Diri</button>
                             </li>
                             <li class="nav-item" role="presentation">
+                                <button class="nav-link rounded-pill fw-bold px-4" id="pills-parent-tab"
+                                    data-bs-toggle="pill" data-bs-target="#pills-parent" type="button">Data Wali
+                                    Murid</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
                                 <button class="nav-link rounded-pill fw-bold px-4" id="pills-qr-tab" data-bs-toggle="pill"
                                     data-bs-target="#pills-qr" type="button">Barcode / QR</button>
                             </li>
                         </ul>
 
                         <div class="tab-content" id="pills-tabContent">
-                            <!-- Info Tab -->
+                            <!-- Info Tab (Data Diri) -->
                             <div class="tab-pane fade show active" id="pills-info" role="tabpanel">
-                                <h5 class="fw-bold mb-4 text-primary">Informasi Akademik & Pribadi</h5>
-                                <div class="row g-4">
-                                    <div class="col-sm-6">
-                                        <label class="small text-muted text-uppercase fw-bold mb-1">Nama Wali Murid</label>
-                                        <p class="fw-semibold fs-5 mb-0">{{ $student->parent->name ?? '-' }}</p>
+                                <h5 class="fw-bold mb-4 text-primary"><i class="bi bi-person-lines-fill me-2"></i>Informasi
+                                    Pribadi</h5>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div
+                                            class="p-3 rounded-4 bg-light bg-opacity-50 border border-light-subtle d-flex align-items-center h-100">
+                                            <div class="rounded-circle bg-white p-2 text-primary shadow-sm me-3 d-flex align-items-center justify-content-center"
+                                                style="width: 48px; height: 48px;">
+                                                <i class="bi bi-person-vcard fs-4"></i>
+                                            </div>
+                                            <div>
+                                                <label class="small text-secondary fw-bold text-uppercase mb-0"
+                                                    style="font-size: 0.7rem;">Nama Lengkap</label>
+                                                <p class="fw-bold text-dark mb-0 fs-6">{{ $student->name }}</p>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="col-sm-6">
-                                        <label class="small text-muted text-uppercase fw-bold mb-1">Nomor Telepon
-                                            Wali</label>
-                                        <p class="fw-semibold fs-5 mb-0">{{ $student->parent->phone ?? '-' }}</p>
+                                    <div class="col-md-6">
+                                        <div
+                                            class="p-3 rounded-4 bg-light bg-opacity-50 border border-light-subtle d-flex align-items-center h-100">
+                                            <div class="rounded-circle bg-white p-2 text-primary shadow-sm me-3 d-flex align-items-center justify-content-center"
+                                                style="width: 48px; height: 48px;">
+                                                <i class="bi bi-hash fs-4"></i>
+                                            </div>
+                                            <div>
+                                                <label class="small text-secondary fw-bold text-uppercase mb-0"
+                                                    style="font-size: 0.7rem;">NIS</label>
+                                                <p class="fw-bold text-dark mb-0 fs-6 font-monospace">{{ $student->nis }}
+                                                </p>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="col-sm-6">
-                                        <label class="small text-muted text-uppercase fw-bold mb-1">Tanggal Lahir</label>
-                                        <p class="fw-semibold fs-5 mb-0">
-                                            {{ $student->birth_date ? \Carbon\Carbon::parse($student->birth_date)->translatedFormat('d F Y') : '-' }}
-                                        </p>
+                                    <div class="col-md-6">
+                                        <div
+                                            class="p-3 rounded-4 bg-light bg-opacity-50 border border-light-subtle d-flex align-items-center h-100">
+                                            <div class="rounded-circle bg-white p-2 text-info shadow-sm me-3 d-flex align-items-center justify-content-center"
+                                                style="width: 48px; height: 48px;">
+                                                <i class="bi bi-backpack fs-4"></i>
+                                            </div>
+                                            <div>
+                                                <label class="small text-secondary fw-bold text-uppercase mb-0"
+                                                    style="font-size: 0.7rem;">Kelas</label>
+                                                <p class="fw-bold text-dark mb-0 fs-6">
+                                                    {{ $student->schoolClass->name ?? 'Belum ditentukan' }}</p>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="col-sm-6">
-                                        <label class="small text-muted text-uppercase fw-bold mb-1">Alamat</label>
-                                        <p class="fw-semibold fs-5 mb-0 text-break">{{ $student->parent->address ?? '-' }}
-                                        </p>
+                                    <div class="col-md-6">
+                                        <div
+                                            class="p-3 rounded-4 bg-light bg-opacity-50 border border-light-subtle d-flex align-items-center h-100">
+                                            <div class="rounded-circle bg-white p-2 text-warning shadow-sm me-3 d-flex align-items-center justify-content-center"
+                                                style="width: 48px; height: 48px;">
+                                                <i class="bi bi-calendar-event fs-4"></i>
+                                            </div>
+                                            <div>
+                                                <label class="small text-secondary fw-bold text-uppercase mb-0"
+                                                    style="font-size: 0.7rem;">Tanggal Lahir</label>
+                                                <p class="fw-bold text-dark mb-0 fs-6">
+                                                    {{ $student->birth_date ? \Carbon\Carbon::parse($student->birth_date)->translatedFormat('d F Y') : '-' }}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div
+                                            class="p-3 rounded-4 bg-light bg-opacity-50 border border-light-subtle d-flex align-items-center h-100">
+                                            <div class="rounded-circle bg-white p-2 text-success shadow-sm me-3 d-flex align-items-center justify-content-center"
+                                                style="width: 48px; height: 48px;">
+                                                <i class="bi bi-gender-ambiguous fs-4"></i>
+                                            </div>
+                                            <div>
+                                                <label class="small text-secondary fw-bold text-uppercase mb-0"
+                                                    style="font-size: 0.7rem;">Jenis Kelamin</label>
+                                                <p class="fw-bold text-dark mb-0 fs-6">
+                                                    {{ $student->gender == 'L' ? 'Laki-laki' : ($student->gender == 'P' ? 'Perempuan' : '-') }}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div
+                                            class="p-3 rounded-4 bg-light bg-opacity-50 border border-light-subtle d-flex align-items-center h-100">
+                                            <div class="rounded-circle bg-white p-2 text-secondary shadow-sm me-3 d-flex align-items-center justify-content-center"
+                                                style="width: 48px; height: 48px;">
+                                                <i class="bi bi-clock-history fs-4"></i>
+                                            </div>
+                                            <div>
+                                                <label class="small text-secondary fw-bold text-uppercase mb-0"
+                                                    style="font-size: 0.7rem;">Terdaftar Sejak</label>
+                                                <p class="fw-bold text-dark mb-0 fs-6">
+                                                    {{ $student->created_at ? $student->created_at->translatedFormat('d F Y') : '-' }}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Parent Tab (Data Wali Murid) -->
+                            <div class="tab-pane fade" id="pills-parent" role="tabpanel">
+                                <h5 class="fw-bold mb-4 text-primary"><i class="bi bi-people-fill me-2"></i>Informasi Wali
+                                    Murid</h5>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div
+                                            class="p-3 rounded-4 bg-light bg-opacity-50 border border-light-subtle d-flex align-items-center h-100">
+                                            <div class="rounded-circle bg-white p-2 text-primary shadow-sm me-3 d-flex align-items-center justify-content-center"
+                                                style="width: 48px; height: 48px;">
+                                                <i class="bi bi-person-heart fs-4"></i>
+                                            </div>
+                                            <div>
+                                                <label class="small text-secondary fw-bold text-uppercase mb-0"
+                                                    style="font-size: 0.7rem;">Nama Wali Murid</label>
+                                                <p class="fw-bold text-dark mb-0 fs-6">{{ $student->parent->name ?? '-' }}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div
+                                            class="p-3 rounded-4 bg-light bg-opacity-50 border border-light-subtle d-flex align-items-center h-100">
+                                            <div class="rounded-circle bg-white p-2 text-success shadow-sm me-3 d-flex align-items-center justify-content-center"
+                                                style="width: 48px; height: 48px;">
+                                                <i class="bi bi-whatsapp fs-4"></i>
+                                            </div>
+                                            <div>
+                                                <label class="small text-secondary fw-bold text-uppercase mb-0"
+                                                    style="font-size: 0.7rem;">Nomor Telepon</label>
+                                                <p class="fw-bold text-dark mb-0 fs-6">{{ $student->parent->phone ?? '-' }}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div
+                                            class="p-3 rounded-4 bg-light bg-opacity-50 border border-light-subtle d-flex align-items-center h-100">
+                                            <div class="rounded-circle bg-white p-2 text-danger shadow-sm me-3 d-flex align-items-center justify-content-center"
+                                                style="width: 48px; height: 48px;">
+                                                <i class="bi bi-geo-alt-fill fs-4"></i>
+                                            </div>
+                                            <div>
+                                                <label class="small text-secondary fw-bold text-uppercase mb-0"
+                                                    style="font-size: 0.7rem;">Alamat Lengkap</label>
+                                                <p class="fw-bold text-dark mb-0 fs-6 text-break">
+                                                    {{ $student->parent->address ?? '-' }}</p>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- QR Tab -->
                             <div class="tab-pane fade" id="pills-qr" role="tabpanel">
-                                <div class="text-center mt-3">
+                                <div
+                                    class="d-flex flex-column flex-md-row justify-content-center align-items-center align-items-md-start gap-4 mt-4">
                                     <!-- ID Card Container -->
                                     <div class="id-card-wrapper d-inline-block position-relative shadow-lg rounded-4 overflow-hidden mb-4"
                                         id="printableArea"
-                                        style="width: 320px; background: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+                                        style="width: 320px; flex-shrink: 0; background: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
                                         <!-- Modern Header with curve -->
                                         <div class="card-header-bg p-4 text-white text-center position-relative"
                                             style="background: linear-gradient(135deg, #0056b3 0%, #004494 100%); padding-bottom: 2rem !important; -webkit-print-color-adjust: exact;">
@@ -126,7 +258,8 @@
                                         <div class="card-body bg-white px-4 pb-4 pt-1 position-relative text-center">
 
                                             <h3 class="fw-bolder text-dark mb-1" style="color: #003366 !important;">
-                                                {{ $student->name }}</h3>
+                                                {{ $student->name }}
+                                            </h3>
                                             <div class="text-muted small fw-bold text-uppercase letter-spacing-2 mb-3">Siswa
                                                 / Student</div>
 
@@ -159,12 +292,12 @@
                                         </div>
                                     </div>
 
-                                    <div class="d-flex justify-content-center gap-3 d-print-none">
+                                    <div class="d-flex flex-column gap-3 d-print-none pt-2">
                                         <button class="btn btn-primary rounded-pill px-4" onclick="downloadCard()">
-                                            <i class="bi bi-download me-2"></i> Download Kartu
+                                            <i class="bi bi-download me-2"></i> Download
                                         </button>
                                         <button class="btn btn-outline-dark rounded-pill px-4" onclick="printCard()">
-                                            <i class="bi bi-printer me-2"></i> Cetak Kartu
+                                            <i class="bi bi-printer me-2"></i> Cetak
                                         </button>
                                     </div>
                                 </div>

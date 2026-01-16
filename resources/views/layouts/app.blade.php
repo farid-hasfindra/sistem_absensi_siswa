@@ -69,15 +69,17 @@
 <body>
     <!-- Sidebar -->
     <div class="sidebar d-flex flex-column">
-        <a href="/" class="sidebar-logo text-decoration-none">
-            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2"
-                style="width: 40px; height: 40px;">
-                <i class="bi bi-mortarboard-fill fs-5"></i>
+        <a href="{{ route('dashboard') }}"
+            class="sidebar-logo text-decoration-none d-flex flex-column align-items-center text-center pb-2">
+            <div class="bg-white rounded-circle d-flex align-items-center justify-content-center mb-2 shadow-sm"
+                style="width: 80px; height: 80px;">
+                <img src="{{ asset('logo_sekolah_baru.jpg') }}" alt="Logo Sekolah" class="img-fluid rounded-circle"
+                    style="max-height: 70px;">
             </div>
             <div>
-                <div class="fw-bold fs-5 text-dark" style="line-height: 1;">Edu<span class="text-primary">Scan</span>
-                </div>
-                <div class="text-muted" style="font-size: 0.7rem;">School Attendance</div>
+                <div class="fw-bold fs-6 text-dark text-uppercase" style="line-height: 1.2;">SMP NEGERI 1</div>
+                <div class="small fw-bold text-primary text-uppercase"
+                    style="font-size: 0.65rem; letter-spacing: 0.5px;">Pangkalan Koto Baru</div>
             </div>
         </a>
 
@@ -195,28 +197,33 @@
     </div>
 
     @if(session('success'))
-        <script>
-            Swal.fire({
-                icon: 'success',
-                title: 'Berhasil',
-                text: "{{ session('success') }}",
-                timer: 3000,
-                showConfirmButton: false
-            });
+        <script>         Swal.fire({             icon: 'success',             title: 'Berhasil',             text: "{{ session('success') }}",             timer: 3000,             showConfirmButton: false         });
         </script>
     @endif
 
     @if(session('error'))
-        <script>
-            Swal.fire({
-                icon: 'error',
-                title: 'Gagal',
-                text: "{{ session('error') }}",
-            });
+        <script>         Swal.fire({             icon: 'error',             title: 'Gagal',             text: "{{ session('error') }}",         });
         </script>
     @endif
 
     @yield('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.querySelector('.sidebar');
+            const key = 'sidebarScrollPos';
+
+            // Restore scroll position
+            const savedPos = localStorage.getItem(key);
+            if (savedPos) {
+                sidebar.scrollTop = savedPos;
+            }
+
+            // Save scroll position
+            sidebar.addEventListener('scroll', function() {
+                localStorage.setItem(key, sidebar.scrollTop);
+            });
+        });
+    </script>
 </body>
 
 </html>

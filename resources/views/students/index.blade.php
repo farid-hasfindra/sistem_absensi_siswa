@@ -22,8 +22,7 @@
                                 <th class="p-4 border-0">Nama</th>
                                 <th class="p-4 border-0">Kelas</th>
                                 <th class="p-4 border-0">Wali Murid</th>
-                                <th class="p-4 border-0">Kode Barcode</th>
-                                <th class="p-4 border-0 rounded-top-end text-end">Aksi</th>
+                                <th class="p-4 border-0 rounded-top-end">Kode Barcode</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -59,48 +58,54 @@
                                         {{ $student->parent->name ?? '-' }}
                                     </td>
                                     <td class="p-4">
-                                        <!-- Clickable Barcode Container -->
-                                        <div class="barcode-container position-relative d-inline-block" style="cursor: pointer;"
-                                            data-code="{{ $student->barcode_code }}" data-name="{{ $student->name }}"
-                                            data-nis="{{ $student->nis }}" onclick="openCardModal(this)">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <!-- Clickable Barcode Container -->
+                                            <div class="barcode-container position-relative d-inline-block" style="cursor: pointer;"
+                                                data-code="{{ $student->barcode_code }}" data-name="{{ $student->name }}"
+                                                data-nis="{{ $student->nis }}" onclick="openCardModal(this)">
+    
+                                                <div class="barcode-list" data-value="{{ $student->barcode_code }}"></div>
+    
+                                                <!-- Hover Overlay hint -->
+                                                <div
+                                                    class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-dark bg-opacity-25 opacity-0 hover-overlay transition-opacity rounded">
+                                                    <i class="bi bi-arrows-fullscreen text-white fs-4"></i>
+                                                </div>
+                                            </div>
 
-                                            <div class="barcode-list" data-value="{{ $student->barcode_code }}"></div>
-
-                                            <!-- Hover Overlay hint -->
-                                            <div
-                                                class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-dark bg-opacity-25 opacity-0 hover-overlay transition-opacity rounded">
-                                                <i class="bi bi-arrows-fullscreen text-white fs-4"></i>
+                                            <!-- Reference to Dropdown Menu -->
+                                            <div class="dropdown ms-3">
+                                                <button class="btn btn-light btn-sm rounded-circle shadow-sm" type="button"
+                                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                                    <i class="bi bi-three-dots-vertical text-secondary"></i>
+                                                </button>
+                                                <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg rounded-4 overflow-hidden">
+                                                    <li>
+                                                        <a class="dropdown-item py-2" href="#" onclick="editStudent({{ json_encode($student) }}); return false;">
+                                                            <i class="bi bi-pencil me-2 text-warning"></i> Edit Data
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <hr class="dropdown-divider my-0">
+                                                    </li>
+                                                    <li>
+                                                        <form action="{{ route('students.destroy', $student) }}" method="POST"
+                                                            onsubmit="return confirm('Hapus siswa ini?')">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="dropdown-item py-2 text-danger">
+                                                                <i class="bi bi-trash me-2"></i> Hapus Permanen
+                                                            </button>
+                                                        </form>
+                                                    </li>
+                                                </ul>
                                             </div>
                                         </div>
-                                    </td>
-                                    <td class="p-4 text-end">
-                                        <!-- Zoom Button (Triggers Modal) -->
-                                        <button class="btn btn-sm btn-light text-primary"
-                                            data-code="{{ $student->barcode_code }}" data-name="{{ $student->name }}"
-                                            data-nis="{{ $student->nis }}" onclick="openCardModal(this)">
-                                            <i class="bi bi-zoom-in"></i>
-                                        </button>
-
-                                        <!-- Edit Button -->
-                                        <button class="btn btn-sm btn-light text-warning"
-                                            onclick="editStudent(@json($student))">
-                                            <i class="bi bi-pencil"></i>
-                                        </button>
-
-                                        <!-- Delete Form -->
-                                        <form action="{{ route('students.destroy', $student) }}" method="POST" class="d-inline"
-                                            onsubmit="return confirm('Hapus siswa ini?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-light text-danger">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </form>
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" class="p-5 text-center text-muted">
+                                    <td colspan="5" class="p-5 text-center text-muted">
                                         <i class="bi bi-inbox fs-1 d-block mb-3"></i>
                                         Tidak ada data siswa. Klik "Tambah Siswa Baru" untuk memulai.
                                     </td>
@@ -139,7 +144,7 @@
                                     </div>
                                 </label>
                                 <input type="file" name="photo" id="photoUpload" class="d-none" accept="image/*"
-                                    onchange="previewImage(this)">
+                                    onchange="previewImage(this, 'photoPreview', 'photoPreviewIcon')">
                             </div>
                         </div>
                         <div class="mb-3">
@@ -175,6 +180,69 @@
                     <div class="modal-footer border-0">
                         <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
                         <button type="submit" class="btn btn-primary px-4">Simpan Siswa</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Student Modal -->
+    <div class="modal fade" id="editStudentModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 rounded-4 shadow">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title fw-bold">Edit Data Siswa</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="editStudentForm" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    @method('PUT')
+                    <div class="modal-body">
+                        <div class="mb-3 text-center">
+                            <label class="form-label d-block fw-bold small text-secondary">Foto Siswa</label>
+                            <div class="image-upload-wrapper d-inline-block position-relative">
+                                <label for="editPhotoUpload" class="cursor-pointer">
+                                    <div class="rounded-circle bg-light d-flex align-items-center justify-content-center border border-2 border-dashed shadow-sm hover-bg-light transition"
+                                        style="width: 100px; height: 100px;">
+                                        <i class="bi bi-camera fs-3 text-muted" id="editPhotoPreviewIcon"></i>
+                                        <img id="editPhotoPreview" src="#"
+                                            class="rounded-circle w-100 h-100 object-fit-cover d-none">
+                                    </div>
+                                </label>
+                                <input type="file" name="photo" id="editPhotoUpload" class="d-none" accept="image/*"
+                                    onchange="previewImage(this, 'editPhotoPreview', 'editPhotoPreviewIcon')">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">NIS</label>
+                            <input type="text" name="nis" id="edit_nis" class="form-control rounded-3" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Nama Lengkap</label>
+                            <input type="text" name="name" id="edit_name" class="form-control rounded-3" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Kelas</label>
+                            <select name="class_id" id="edit_class_id" class="form-select rounded-3">
+                                <option value="">-- Pilih Kelas --</option>
+                                @foreach($classes as $class)
+                                    <option value="{{ $class->id }}">{{ $class->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Wali Murid</label>
+                            <select name="parent_id" id="edit_parent_id" class="form-select rounded-3">
+                                <option value="">-- Pilih Wali Murid --</option>
+                                @foreach($parents as $parent)
+                                    <option value="{{ $parent->id }}">{{ $parent->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary px-4">Simpan Perubahan</button>
                     </div>
                 </form>
             </div>
@@ -386,16 +454,33 @@
         }
 
         function editStudent(student) {
-            alert("Fitur Edit untuk " + student.name + " akan segera hadir.");
+            document.getElementById('editStudentForm').action = "/students/" + student.id;
+            document.getElementById('edit_nis').value = student.nis;
+            document.getElementById('edit_name').value = student.name;
+            document.getElementById('edit_class_id').value = student.class_id;
+            document.getElementById('edit_parent_id').value = student.parent_id;
+
+            // Handle Photo Preview if exists
+            if (student.photo) {
+                document.getElementById('editPhotoPreview').src = "/storage/" + student.photo;
+                document.getElementById('editPhotoPreview').classList.remove('d-none');
+                document.getElementById('editPhotoPreviewIcon').classList.add('d-none');
+            } else {
+                document.getElementById('editPhotoPreview').src = "#";
+                document.getElementById('editPhotoPreview').classList.add('d-none');
+                document.getElementById('editPhotoPreviewIcon').classList.remove('d-none');
+            }
+
+            new bootstrap.Modal(document.getElementById('editStudentModal')).show();
         }
 
-        function previewImage(input) {
+        function previewImage(input, previewId, iconId) {
             if (input.files && input.files[0]) {
                 var reader = new FileReader();
                 reader.onload = function (e) {
-                    document.getElementById('photoPreview').src = e.target.result;
-                    document.getElementById('photoPreview').classList.remove('d-none');
-                    document.getElementById('photoPreviewIcon').classList.add('d-none');
+                    document.getElementById(previewId).src = e.target.result;
+                    document.getElementById(previewId).classList.remove('d-none');
+                    document.getElementById(iconId).classList.add('d-none');
                 }
                 reader.readAsDataURL(input.files[0]);
             }
