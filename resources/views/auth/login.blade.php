@@ -227,9 +227,9 @@
                 <p class="text-secondary fw-bold small text-uppercase letter-spacing-2">Pangkalan Koto Baru</p>
             </div>
 
-            <div class="text-start mb-4 ps-1">
-                <p class="text-muted mb-0 small">Selamat Datang,</p>
-                <h2 class="fw-bold text-dark">Silakan Masuk 👋</h2>
+            <div class="text-center mb-4">
+                <h2 class="fw-bold text-dark">Selamat Datang</h2>
+                <p class="text-muted small mb-0">Silakan masuk untuk melanjutkan</p>
             </div>
 
             <form method="POST" action="{{ route('login.post') }}">

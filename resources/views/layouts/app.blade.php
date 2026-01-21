@@ -184,7 +184,8 @@
         <hr>
         <form action="{{ route('logout') }}" method="POST">
             @csrf
-            <button type="submit" class="nav-link w-100 border-0 bg-transparent text-danger">
+            <button type="submit" class="nav-link w-100 border-0 bg-transparent text-danger"
+                onclick="localStorage.removeItem('sidebarScrollPos')">
                 <i class="bi bi-box-arrow-right"></i>
                 Keluar
             </button>
@@ -192,23 +193,29 @@
     </div>
 
     <!-- Main Content -->
-    <div class="main-content">
+    <div class="main-content fade-in-up">
         @yield('content')
     </div>
 
     @if(session('success'))
-        <script>         Swal.fire({             icon: 'success',             title: 'Berhasil',             text: "{{ session('success') }}",             timer: 3000,             showConfirmButton: false         });
+        <script>         Swal.fire({ icon: 'success', title: 'Berhasil', text: "{{ session('success') }}", timer: 3000, showConfirmButton: false });
         </script>
     @endif
 
     @if(session('error'))
-        <script>         Swal.fire({             icon: 'error',             title: 'Gagal',             text: "{{ session('error') }}",         });
+        <script>         Swal.fire({ icon: 'error', title: 'Gagal', text: "{{ session('error') }}", });
         </script>
     @endif
 
     @yield('scripts')
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
+            // Prevent auto-scroll on refresh
+            if ('scrollRestoration' in history) {
+                history.scrollRestoration = 'manual';
+            }
+            window.scrollTo(0, 0);
+
             const sidebar = document.querySelector('.sidebar');
             const key = 'sidebarScrollPos';
 
@@ -219,7 +226,7 @@
             }
 
             // Save scroll position
-            sidebar.addEventListener('scroll', function() {
+            sidebar.addEventListener('scroll', function () {
                 localStorage.setItem(key, sidebar.scrollTop);
             });
         });

@@ -50,9 +50,9 @@
                                     <td class="p-4">{{ $user->username }}</td>
                                     <td class="p-4">
                                         <span class="badge rounded-pill px-3 py-2 
-                                                                            @if($user->role == 'admin') bg-dark 
-                                                                            @elseif($user->role == 'guru') bg-primary 
-                                                                            @else bg-warning text-dark @endif">
+                                                                                            @if($user->role == 'admin') bg-dark 
+                                                                                            @elseif($user->role == 'guru') bg-primary 
+                                                                                            @else bg-warning text-dark @endif">
                                             {{ ucfirst($user->role) }}
                                         </span>
                                     </td>
@@ -119,7 +119,7 @@
                             <label class="form-label">Kata Sandi</label>
                             <div class="input-group">
                                 <input type="password" name="password" id="userPassword"
-                                    class="form-control rounded-start-3" required>
+                                    class="form-control rounded-start-3" required autocomplete="new-password">
                                 <button type="button" class="btn btn-outline-secondary"
                                     onclick="togglePassword('userPassword')">
                                     <i class="bi bi-eye"></i>
@@ -232,6 +232,9 @@
                 document.getElementById('parentFields').classList.remove('d-none');
             }
         });
+
+        // Trigger change event on load to show default fields
+        document.getElementById('roleSelect').dispatchEvent(new Event('change'));
 
         function togglePassword(inputId) {
             const input = document.getElementById(inputId);

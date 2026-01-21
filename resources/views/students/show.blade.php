@@ -29,11 +29,7 @@
                                     <i class="bi bi-person fs-1 text-secondary"></i>
                                 </div>
                             @endif
-                            <span
-                                class="position-absolute bottom-0 end-0 bg-primary text-white rounded-circle p-2 border border-3 border-white shadow-sm"
-                                title="Siswa Aktif">
-                                <i class="bi bi-check-lg small"></i>
-                            </span>
+
                         </div>
 
                         <h4 class="fw-bold mb-1">{{ $student->name }}</h4>

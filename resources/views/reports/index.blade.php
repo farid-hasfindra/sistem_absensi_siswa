@@ -8,7 +8,12 @@
                 <p class="text-muted">Lihat dan ekspor riwayat absensi</p>
             </div>
             <div>
-                <a href="{{ route('reports.export') }}" class="btn btn-success text-white">
+                @if(Auth::user()->role === 'guru')
+                    <a href="{{ route('attendance.create') }}" class="btn btn-primary text-white me-2">
+                        <i class="bi bi-plus-lg"></i> Tambah Absensi
+                    </a>
+                @endif
+                <a href="{{ route('reports.export', ['date' => $date]) }}" class="btn btn-success text-white">
                     <i class="bi bi-file-earmark-excel"></i> Ekspor Excel
                 </a>
             </div>
@@ -40,6 +45,9 @@
                                 <th class="p-4 border-0">Tipe</th>
                                 <th class="p-4 border-0">Status</th>
                                 <th class="p-4 border-0 rounded-top-end">Tanggal</th>
+                                @if(Auth::user()->role === 'guru')
+                                    <th class="p-4 border-0 rounded-top-end">Aksi</th>
+                                @endif
                             </tr>
                         </thead>
                         <tbody>
@@ -72,6 +80,24 @@
                                         @endif
                                     </td>
                                     <td class="p-4 text-muted">{{ $attendance->date }}</td>
+                                    @if(Auth::user()->role === 'guru')
+                                        <td class="p-4">
+                                            <div class="d-flex gap-2">
+                                                <a href="{{ route('attendance.edit', $attendance->id) }}"
+                                                    class="btn btn-sm btn-outline-warning">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                                <form action="{{ route('attendance.destroy', $attendance->id) }}" method="POST"
+                                                    onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    @endif
                                 </tr>
                             @empty
                                 <tr>

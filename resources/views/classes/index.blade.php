@@ -37,7 +37,6 @@
                         <thead class="bg-light">
                             <tr>
                                 <th class="p-4 border-0 rounded-top-start">Nama Kelas</th>
-                                <th class="p-4 border-0">Tingkat</th>
                                 <th class="p-4 border-0">Wali Kelas</th>
                                 <th class="p-4 border-0 rounded-top-end text-end">Aksi</th>
                             </tr>
@@ -46,7 +45,6 @@
                             @foreach($classes as $class)
                                 <tr>
                                     <td class="p-4 fw-bold">{{ $class->name }}</td>
-                                    <td class="p-4">{{ $class->level ?? '-' }}</td>
                                     <td class="p-4">
                                         @if($class->teacher)
                                             <div class="d-flex align-items-center gap-2">
@@ -61,6 +59,10 @@
                                         @endif
                                     </td>
                                     <td class="p-4 text-end">
+                                        <button class="btn btn-sm btn-light text-warning me-1" data-bs-toggle="modal"
+                                            data-bs-target="#editClassModal{{ $class->id }}">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
                                         <form action="{{ route('classes.destroy', $class) }}" method="POST" class="d-inline"
                                             onsubmit="return confirm('Hapus kelas ini?')">
                                             @csrf
@@ -78,6 +80,48 @@
         </div>
     </div>
 
+    <!-- Edit Class Modals -->
+    @foreach($classes as $class)
+        <div class="modal fade" id="editClassModal{{ $class->id }}" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow rounded-4">
+                    <div class="modal-header border-0">
+                        <h5 class="modal-title fw-bold">Edit Kelas</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <form action="{{ route('classes.update', $class->id) }}" method="POST">
+                        @csrf
+                        @method('PUT')
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-md-12 mb-3">
+                                    <label class="form-label">Nama Kelas</label>
+                                    <input type="text" name="name" class="form-control rounded-3" value="{{ $class->name }}"
+                                        required>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Wali Kelas</label>
+                                <select name="teacher_id" class="form-select rounded-3">
+                                    <option value="">-- Pilih Guru --</option>
+                                    @foreach($teachers as $teacher)
+                                        <option value="{{ $teacher->id }}" {{ $class->teacher_id == $teacher->id ? 'selected' : '' }}>
+                                            {{ $teacher->name }} ({{ $teacher->nip }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer border-0">
+                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-primary px-4">Simpan Perubahan</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    @endforeach
+
     <!-- Add Class Modal -->
     <div class="modal fade" id="addClassModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
@@ -90,18 +134,10 @@
                     @csrf
                     <div class="modal-body">
                         <div class="row">
-                            <div class="col-md-8 mb-3">
+                            <div class="col-md-12 mb-3">
                                 <label class="form-label">Nama Kelas</label>
                                 <input type="text" name="name" class="form-control rounded-3" placeholder="Contoh: X IPA 1"
                                     required>
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label">Tingkat</label>
-                                <select name="level" class="form-select rounded-3">
-                                    <option value="10">10</option>
-                                    <option value="11">11</option>
-                                    <option value="12">12</option>
-                                </select>
                             </div>
                         </div>
                         <div class="mb-3">

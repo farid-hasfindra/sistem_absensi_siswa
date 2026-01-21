@@ -32,15 +32,18 @@ class ReportController extends Controller
         return view('reports.index', compact('attendances', 'date'));
     }
 
-    public function export()
+    public function export(Request $request)
     {
         $user = auth()->user();
-        $filename = "absensi-" . date('Y-m-d') . ".xls";
+        $date = $request->input('date', date('Y-m-d'));
+        $filename = "absensi-" . $date . ".csv";
 
-        header("Content-Type: application/vnd.ms-excel");
+        header("Content-Type: text/csv");
         header("Content-Disposition: attachment; filename=\"$filename\"");
 
-        $query = \App\Models\Attendance::with(['student.schoolClass'])->latest();
+        $query = \App\Models\Attendance::with(['student.schoolClass'])
+            ->whereDate('date', $date)
+            ->latest();
 
         if ($user->role == 'wali_murid') {
             $studentIds = $user->parent ? $user->parent->students->pluck('id') : [];
@@ -56,20 +59,22 @@ class ReportController extends Controller
 
         $attendances = $query->get();
 
-        echo "<table border='1'>";
-        echo "<tr><th>Date</th><th>Student</th><th>NIS</th><th>Class</th><th>Type</th><th>Status</th><th>Time</th></tr>";
+        $handle = fopen('php://output', 'w');
+        fputcsv($handle, ['Date', 'Student', 'NIS', 'Class', 'Type', 'Status', 'Time']);
+
         foreach ($attendances as $row) {
-            echo "<tr>";
-            echo "<td>{$row->date}</td>";
-            echo "<td>{$row->student->name}</td>";
-            echo "<td>{$row->student->nis}</td>";
-            echo "<td>" . ($row->student->schoolClass->name ?? '-') . "</td>";
-            echo "<td>{$row->type}</td>";
-            echo "<td>{$row->status}</td>";
-            echo "<td>{$row->scanned_at}</td>";
-            echo "</tr>";
+            fputcsv($handle, [
+                $row->date,
+                $row->student->name,
+                $row->student->nis,
+                $row->student->schoolClass->name ?? '-',
+                $row->type,
+                $row->status,
+                \Carbon\Carbon::parse($row->scanned_at)->format('H:i:s')
+            ]);
         }
-        echo "</table>";
+
+        fclose($handle);
         exit;
     }
 }

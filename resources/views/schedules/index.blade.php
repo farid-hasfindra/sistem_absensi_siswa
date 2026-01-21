@@ -59,6 +59,10 @@
                                     <td class="p-4 fw-bold">{{ $schedule->subject->name }}</td>
                                     <td class="p-4 text-muted">{{ $schedule->teacher->name }}</td>
                                     <td class="p-4 text-end">
+                                        <button class="btn btn-sm btn-light text-warning me-1" data-bs-toggle="modal"
+                                            data-bs-target="#editScheduleModal{{ $schedule->id }}">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
                                         <form action="{{ route('schedules.destroy', $schedule) }}" method="POST"
                                             class="d-inline" onsubmit="return confirm('Hapus jadwal ini?')">
                                             @csrf
@@ -79,6 +83,83 @@
             </div>
         </div>
     </div>
+
+    <!-- Edit Schedule Modals -->
+    @foreach($schedules as $schedule)
+        <div class="modal fade" id="editScheduleModal{{ $schedule->id }}" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow rounded-4">
+                    <div class="modal-header border-0">
+                        <h5 class="modal-title fw-bold">Edit Jadwal</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <form action="{{ route('schedules.update', $schedule->id) }}" method="POST">
+                        @csrf
+                        @method('PUT')
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Hari</label>
+                                    <select name="day" class="form-select rounded-3" required>
+                                        <option value="Monday" {{ $schedule->day == 'Monday' ? 'selected' : '' }}>Senin</option>
+                                        <option value="Tuesday" {{ $schedule->day == 'Tuesday' ? 'selected' : '' }}>Selasa
+                                        </option>
+                                        <option value="Wednesday" {{ $schedule->day == 'Wednesday' ? 'selected' : '' }}>Rabu
+                                        </option>
+                                        <option value="Thursday" {{ $schedule->day == 'Thursday' ? 'selected' : '' }}>Kamis
+                                        </option>
+                                        <option value="Friday" {{ $schedule->day == 'Friday' ? 'selected' : '' }}>Jumat</option>
+                                        <option value="Saturday" {{ $schedule->day == 'Saturday' ? 'selected' : '' }}>Sabtu
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Kelas</label>
+                                    <select name="class_id" class="form-select rounded-3" required>
+                                        @foreach($classes as $class)
+                                            <option value="{{ $class->id }}" {{ $schedule->class_id == $class->id ? 'selected' : '' }}>{{ $class->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Waktu Mulai</label>
+                                    <input type="time" name="start_time" class="form-control rounded-3"
+                                        value="{{ $schedule->start_time }}" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Waktu Selesai</label>
+                                    <input type="time" name="end_time" class="form-control rounded-3"
+                                        value="{{ $schedule->end_time }}" required>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Mata Pelajaran</label>
+                                <select name="subject_id" class="form-select rounded-3" required>
+                                    @foreach($subjects as $subject)
+                                        <option value="{{ $subject->id }}" {{ $schedule->subject_id == $subject->id ? 'selected' : '' }}>{{ $subject->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Guru</label>
+                                <select name="teacher_id" class="form-select rounded-3" required>
+                                    @foreach($teachers as $teacher)
+                                        <option value="{{ $teacher->id }}" {{ $schedule->teacher_id == $teacher->id ? 'selected' : '' }}>{{ $teacher->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer border-0">
+                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-primary px-4">Simpan Perubahan</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    @endforeach
 
     <!-- Add Schedule Modal -->
     <div class="modal fade" id="addScheduleModal" tabindex="-1">
