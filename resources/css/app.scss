@@ -206,3 +206,11 @@ body {
         transform: scale(1);
     }
 }
+
+.hover-primary {
+    transition: color 0.2s ease;
+}
+
+.hover-primary:hover {
+    color: var(--primary-color) !important;
+}

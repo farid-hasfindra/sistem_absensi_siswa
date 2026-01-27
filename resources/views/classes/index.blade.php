@@ -59,6 +59,11 @@
                                         @endif
                                     </td>
                                     <td class="p-4 text-end">
+                                        <a href="{{ route('classes.show', $class->id) }}"
+                                            class="btn btn-sm btn-light text-primary me-1" data-bs-toggle="tooltip"
+                                            title="Lihat Siswa">
+                                            <i class="bi bi-people"></i>
+                                        </a>
                                         <button class="btn btn-sm btn-light text-warning me-1" data-bs-toggle="modal"
                                             data-bs-target="#editClassModal{{ $class->id }}">
                                             <i class="bi bi-pencil"></i>

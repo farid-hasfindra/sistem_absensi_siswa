@@ -142,6 +142,13 @@
                         Jadwal Pelajaran
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a href="{{ route('teachers.index') }}"
+                        class="nav-link {{ request()->routeIs('teachers.*') ? 'active' : '' }}">
+                        <i class="bi bi-person-video3 me-2"></i>
+                        Daftar Guru
+                    </a>
+                </li>
                 <li class="nav-item mt-3">
                     <div class="text-uppercase text-muted ps-3 mb-2" style="font-size: 0.7rem; letter-spacing: 1px;">
                         Akademik</div>

@@ -27,6 +27,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Admin Management
     Route::resource('users', UserController::class);
+    Route::resource('teachers', \App\Http\Controllers\TeacherController::class);
     Route::resource('classes', SchoolClassController::class)->parameters(['classes' => 'schoolClass']);
     Route::resource('subjects', SubjectController::class);
     Route::resource('schedules', ScheduleController::class);

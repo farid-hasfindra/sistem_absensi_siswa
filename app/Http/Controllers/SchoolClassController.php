@@ -16,6 +16,12 @@ class SchoolClassController extends Controller
         return view('classes.index', compact('classes', 'teachers'));
     }
 
+    public function show(SchoolClass $schoolClass)
+    {
+        $schoolClass->load(['teacher', 'students', 'students.parent']);
+        return view('classes.show', compact('schoolClass'));
+    }
+
     public function store(Request $request)
     {
         $request->validate([

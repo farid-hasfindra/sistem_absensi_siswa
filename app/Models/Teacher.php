@@ -17,4 +17,9 @@ class Teacher extends Model
     {
         return $this->hasOne(SchoolClass::class, 'teacher_id');
     }
+
+    public function schedules()
+    {
+        return $this->hasMany(Schedule::class);
+    }
 }
