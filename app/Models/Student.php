@@ -26,6 +26,11 @@ class Student extends Model
         return $this->belongsTo(SchoolClass::class, 'class_id');
     }
 
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
     public function parent()
     {
         return $this->belongsTo(ParentModel::class, 'parent_id');
@@ -34,5 +39,17 @@ class Student extends Model
     public function attendances()
     {
         return $this->hasMany(Attendance::class);
+    }
+
+    /**
+     * Get the student's class name.
+     * Fallback to relationship if column is empty.
+     */
+    public function getClassAttribute($value)
+    {
+        if (!empty($value)) {
+            return $value;
+        }
+        return $this->schoolClass ? $this->schoolClass->name : '-';
     }
 }

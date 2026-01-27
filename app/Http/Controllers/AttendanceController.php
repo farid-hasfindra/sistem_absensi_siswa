@@ -59,6 +59,7 @@ class AttendanceController extends Controller
             'status' => $status,
             'scanned_at' => $now,
             'date' => today(),
+            'recorded_by' => auth()->id(),
         ]);
 
         return response()->json([
@@ -72,7 +73,7 @@ class AttendanceController extends Controller
     public function create()
     {
         $user = auth()->user();
-        if ($user->role !== 'guru' || !$user->teacher) {
+        if (($user->role !== 'guru' && $user->role !== 'guru_mapel') || !$user->teacher) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -106,7 +107,8 @@ class AttendanceController extends Controller
             'type' => $request->type,
             'status' => $request->status,
             'date' => $request->date,
-            'scanned_at' => $scannedAt
+            'scanned_at' => $scannedAt,
+            'recorded_by' => auth()->id()
         ]);
 
         return redirect()->route('reports.index')->with('success', 'Data absensi berhasil ditambahkan!');

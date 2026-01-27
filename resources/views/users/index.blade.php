@@ -37,7 +37,7 @@
                         <thead class="bg-light">
                             <tr>
                                 <th class="p-4 border-0 rounded-top-start">Nama</th>
-                                <th class="p-4 border-0">Username</th>
+                                <th class="p-4 border-0">Email / Username</th>
                                 <th class="p-4 border-0">Peran</th>
                                 <th class="p-4 border-0">Detail</th>
                                 <th class="p-4 border-0 rounded-top-end text-end">Aksi</th>
@@ -47,12 +47,13 @@
                             @foreach($users as $user)
                                 <tr>
                                     <td class="p-4 fw-bold">{{ $user->name }}</td>
-                                    <td class="p-4">{{ $user->username }}</td>
+                                    <td class="p-4">{{ $user->email ?? $user->username }}</td>
                                     <td class="p-4">
-                                        <span class="badge rounded-pill px-3 py-2 
-                                                                                            @if($user->role == 'admin') bg-dark 
-                                                                                            @elseif($user->role == 'guru') bg-primary 
-                                                                                            @else bg-warning text-dark @endif">
+                                        <span
+                                            class="badge rounded-pill px-3 py-2 
+                                                                                                            @if($user->role == 'admin') bg-dark 
+                                                                                                            @elseif($user->role == 'guru') bg-primary 
+                                                                                                            @else bg-warning text-dark @endif">
                                             {{ ucfirst($user->role) }}
                                         </span>
                                     </td>
@@ -67,7 +68,7 @@
                                     </td>
                                     <td class="p-4 text-end">
                                         <button class="btn btn-sm btn-light text-warning me-1"
-                                            onclick="editUser({{ $user->load('teacher', 'parent') }})">
+                                            onclick="editUser({{ $user->load('teacher') }})">
                                             <i class="bi bi-pencil"></i>
                                         </button>
                                         <form action="{{ route('users.destroy', $user) }}" method="POST" class="d-inline"
@@ -103,15 +104,12 @@
                             <input type="text" name="name" class="form-control rounded-3" required>
                         </div>
                         <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Username</label>
-                                <input type="text" name="username" class="form-control rounded-3" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-12 mb-3">
                                 <label class="form-label">Peran</label>
                                 <select name="role" class="form-select rounded-3" id="roleSelect" required>
-                                    <option value="guru">Guru</option>
-                                    <option value="wali_murid">Wali Murid</option>
+                                    <option value="guru">Guru (Wali Kelas)</option>
+                                    <option value="guru_mapel">Guru Mapel</option>
+                                    <!-- Wali Murid removed -->
                                 </select>
                             </div>
                         </div>
@@ -128,24 +126,11 @@
                         </div>
 
                         <!-- Teacher Fields -->
-                        <div id="teacherFields" class="d-none bg-light p-3 rounded-3 mb-3">
+                        <div id="teacherFields" class="bg-light p-3 rounded-3 mb-3">
                             <h6 class="fw-bold mb-3 text-primary">Detail Guru</h6>
                             <div class="mb-3">
-                                <label class="form-label">NIP</label>
-                                <input type="text" name="nip" class="form-control">
-                            </div>
-                        </div>
-
-                        <!-- Parent Fields -->
-                        <div id="parentFields" class="d-none bg-light p-3 rounded-3 mb-3">
-                            <h6 class="fw-bold mb-3 text-warning">Detail Wali Murid</h6>
-                            <div class="mb-3">
-                                <label class="form-label">Nomor Telepon</label>
-                                <input type="text" name="phone" class="form-control">
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Alamat</label>
-                                <textarea name="address" class="form-control" rows="2"></textarea>
+                                <label class="form-label">NIP (Email akan otomatis dibuat: NIP@teacher.ac.id)</label>
+                                <input type="text" name="nip" class="form-control" required>
                             </div>
                         </div>
                     </div>
@@ -175,8 +160,7 @@
                             <input type="text" name="name" id="editName" class="form-control rounded-3" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Username</label>
-                            <input type="text" name="username" id="editUsername" class="form-control rounded-3" required>
+                            <!-- Username removed from edit -->
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Kata Sandi (Opsional)</label>
@@ -223,18 +207,17 @@
     <script>
         document.getElementById('roleSelect').addEventListener('change', function () {
             const role = this.value;
-            document.getElementById('teacherFields').classList.add('d-none');
-            document.getElementById('parentFields').classList.add('d-none');
-
-            if (role === 'guru') {
+            // Both guru and guru_mapel differ only in permission, data structure is same (Teacher)
+            if (role === 'guru' || role === 'guru_mapel') {
                 document.getElementById('teacherFields').classList.remove('d-none');
-            } else if (role === 'wali_murid') {
-                document.getElementById('parentFields').classList.remove('d-none');
+            } else {
+                document.getElementById('teacherFields').classList.add('d-none');
             }
         });
 
         // Trigger change event on load to show default fields
         document.getElementById('roleSelect').dispatchEvent(new Event('change'));
+
 
         function togglePassword(inputId) {
             const input = document.getElementById(inputId);
@@ -257,15 +240,11 @@
 
             // Reset fields
             document.getElementById('editTeacherFields').classList.add('d-none');
-            document.getElementById('editParentFields').classList.add('d-none');
+            // document.getElementById('editParentFields').classList.add('d-none'); // Removed
 
-            if (user.role === 'guru' && user.teacher) {
+            if ((user.role === 'guru' || user.role === 'guru_mapel') && user.teacher) {
                 document.getElementById('editTeacherFields').classList.remove('d-none');
                 document.getElementById('editNip').value = user.teacher.nip;
-            } else if (user.role === 'wali_murid' && user.parent) {
-                document.getElementById('editParentFields').classList.remove('d-none');
-                document.getElementById('editPhone').value = user.parent.phone;
-                document.getElementById('editAddress').value = user.parent.address;
             }
 
             new bootstrap.Modal(document.getElementById('editUserModal')).show();

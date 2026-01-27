@@ -10,9 +10,16 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
 
-        if ($user->role == 'guru') {
-            $class = $user->teacher ? $user->teacher->schoolClass : null;
-            $students = $class ? $class->students : collect([]);
+        if ($user->role == 'guru' || $user->role == 'guru_mapel') {
+            $class = ($user->role == 'guru' && $user->teacher) ? $user->teacher->schoolClass : null;
+            // If not homeroom teacher (guru mapel or guru without class), show empty or all?
+            // Since they scan via 'Attendance' menu, dashboard might just show stats for today if possible, or limited view.
+            // For now, let's keep it safe. If no class, empty students.
+            if ($user->role == 'guru_mapel') {
+                $students = \App\Models\Student::all();
+            } else {
+                $students = $class ? $class->students : collect([]);
+            }
             $totalStudents = $students->count();
 
             $attendanceStats = [

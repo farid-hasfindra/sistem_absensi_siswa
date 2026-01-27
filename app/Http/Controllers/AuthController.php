@@ -14,19 +14,40 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $credentials = $request->validate([
-            'username' => ['required'],
+        $input = $request->input('email');
+
+        $fieldType = filter_var($input, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+
+        $rules = [
+            'email' => ['required'], // Just required, not email format if it's username
             'password' => ['required'],
-        ]);
+        ];
+
+        // If it's an email, we can add email validation, but 'admin' string fails that.
+        // So let's keep it simple 'required'.
+
+        $credentials = [
+            $fieldType => $input,
+            'password' => $request->input('password')
+        ];
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
+
+            // Redirect based on role
+            $user = Auth::user();
+            if ($user->role === 'siswa') {
+                return redirect()->intended('dashboard');
+            } elseif ($user->role === 'guru' || $user->role === 'guru_mapel') {
+                return redirect()->intended('dashboard');
+            }
+
             return redirect()->intended('dashboard');
         }
 
         return back()->withErrors([
-            'username' => 'The provided credentials do not match our records.',
-        ])->onlyInput('username');
+            'email' => 'Username atau Email tidak ditemukan.',
+        ])->onlyInput('email');
     }
 
     public function logout(Request $request)

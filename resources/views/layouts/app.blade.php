@@ -94,7 +94,9 @@
                 </div>
                 <div class="text-muted" style="font-size: 0.75rem;">
                     @if(Auth::user()->role == 'admin') Administrator
-                    @elseif(Auth::user()->role == 'guru') Guru
+                    @elseif(Auth::user()->role == 'guru') Wali Kelas
+                    @elseif(Auth::user()->role == 'guru_mapel') Guru Mapel
+                    @elseif(Auth::user()->role == 'siswa') Siswa
                     @else Wali Murid @endif
                 </div>
             </div>
@@ -164,7 +166,7 @@
                 </li>
             @endif
 
-            @if(Auth::user()->role === 'guru')
+            @if(Auth::user()->role === 'guru' || Auth::user()->role === 'guru_mapel')
                 <li class="nav-item">
                     <a href="{{ route('attendance.index') }}"
                         class="nav-link {{ request()->routeIs('attendance.*') ? 'active' : '' }}">
@@ -174,7 +176,7 @@
                 </li>
             @endif
 
-            @if(in_array(Auth::user()->role, ['admin', 'guru', 'wali_murid']))
+            @if(in_array(Auth::user()->role, ['admin', 'guru', 'guru_mapel', 'wali_murid']))
                 <li class="nav-item">
                     <a href="{{ route('reports.index') }}"
                         class="nav-link {{ request()->routeIs('reports.*') ? 'active' : '' }}">

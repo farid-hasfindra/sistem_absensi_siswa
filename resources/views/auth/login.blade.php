@@ -235,10 +235,10 @@
             <form method="POST" action="{{ route('login.post') }}">
                 @csrf
                 <div class="form-floating mb-3">
-                    <input type="text" name="username" class="form-control" id="usernameInput" placeholder="Username"
-                        required value="{{ old('username') }}">
-                    <label for="usernameInput">Username</label>
-                    @error('username')
+                    <input type="text" name="email" class="form-control" id="emailInput" placeholder="Email / Username"
+                        required value="{{ old('email') }}">
+                    <label for="emailInput">Email / Username</label>
+                    @error('email')
                         <small class="text-danger ps-3">{{ $message }}</small>
                     @enderror
                 </div>

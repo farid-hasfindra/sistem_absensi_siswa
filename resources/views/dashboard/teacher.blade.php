@@ -12,7 +12,13 @@
                     </div>
                     <div class="position-relative z-1">
                         <h2 class="fw-bold mb-1">Selamat Datang, {{ Auth::user()->name }}!</h2>
-                        <p class="mb-0 opacity-75">Wali Kelas: <strong>{{ $class->name ?? 'Belum ditentukan' }}</strong></p>
+                        <p class="mb-0 opacity-75">
+                            @if(Auth::user()->role == 'guru' && isset($class))
+                                Wali Kelas: <strong>{{ $class->name }}</strong>
+                            @else
+                                <strong>Guru Mata Pelajaran</strong>
+                            @endif
+                        </p>
                     </div>
                 </div>
             </div>

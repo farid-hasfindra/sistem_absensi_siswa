@@ -173,6 +173,15 @@
                                 @endforeach
                             </select>
                         </div>
+                        <div class="mb-3">
+                            <label class="form-label">Password Akun (Login)</label>
+                            <div class="input-group">
+                                <input type="password" name="password" id="studentPassword" class="form-control rounded-start-3" required minlength="6">
+                                <button type="button" class="btn btn-outline-secondary" onclick="toggleStudentPassword('studentPassword', this)">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                            <small class="text-muted">Password untuk login siswa (Email: NIS@student.ac.id)</small>
                         <div class="alert alert-info small">
                             <i class="bi bi-info-circle me-1"></i> Barcode akan digenerate otomatis oleh sistem.
                         </div>
@@ -238,6 +247,16 @@
                                     <option value="{{ $parent->id }}">{{ $parent->name }}</option>
                                 @endforeach
                             </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Password Baru (Opsional)</label>
+                            <div class="input-group">
+                                <input type="password" name="password" id="editStudentPassword" class="form-control rounded-start-3" placeholder="Kosongkan jika tidak diubah" minlength="6">
+                                <button type="button" class="btn btn-outline-secondary" onclick="toggleStudentPassword('editStudentPassword', this)">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                            <small class="text-muted">Isi hanya jika ingin mengubah password login.</small>
                         </div>
                     </div>
                     <div class="modal-footer border-0">
@@ -483,6 +502,20 @@
                     document.getElementById(iconId).classList.add('d-none');
                 }
                 reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function toggleStudentPassword(inputId, btn) {
+            const input = document.getElementById(inputId);
+            const icon = btn.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('bi-eye');
+                icon.classList.add('bi-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('bi-eye-slash');
+                icon.classList.add('bi-eye');
             }
         }
     </script>

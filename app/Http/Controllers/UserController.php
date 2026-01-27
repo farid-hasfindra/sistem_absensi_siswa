@@ -14,7 +14,7 @@ class UserController extends Controller
 {
     public function index()
     {
-        $users = User::with(['teacher', 'parent'])->latest()->get();
+        $users = User::with(['teacher'])->latest()->get();
         return view('users.index', compact('users'));
     }
 
@@ -22,35 +22,34 @@ class UserController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            'username' => 'required|unique:users',
+            // 'username' => 'required|unique:users', // No longer used
             'password' => 'required|min:6',
-            'role' => 'required|in:guru,wali_murid',
-            // Specific validation based on role
-            'nip' => 'required_if:role,guru|unique:teachers,nip',
-            'phone' => 'nullable',
-            'address' => 'nullable',
+            'role' => 'required|in:guru,guru_mapel',
+            'nip' => 'required_if:role,guru,guru_mapel|unique:teachers,nip',
         ]);
 
         DB::transaction(function () use ($request) {
+            $email = null;
+            $username = null;
+
+            if ($request->role === 'guru' || $request->role === 'guru_mapel') {
+                $email = $request->nip . '@teacher.ac.id';
+                $username = $request->nip;
+            }
+
             $user = User::create([
                 'name' => $request->name,
-                'username' => $request->username,
+                'email' => $email,
+                'username' => $username, // Keep explicit username for now as fallback
                 'password' => Hash::make($request->password),
                 'role' => $request->role,
             ]);
 
-            if ($request->role === 'guru') {
+            if ($request->role === 'guru' || $request->role === 'guru_mapel') {
                 Teacher::create([
                     'user_id' => $user->id,
                     'nip' => $request->nip,
                     'name' => $request->name,
-                ]);
-            } elseif ($request->role === 'wali_murid') {
-                ParentModel::create([
-                    'user_id' => $user->id,
-                    'name' => $request->name,
-                    'phone' => $request->phone,
-                    'address' => $request->address,
                 ]);
             }
         });
@@ -62,13 +61,11 @@ class UserController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            'username' => 'required|unique:users,username,' . $user->id,
             'password' => 'nullable|min:6',
         ]);
 
         $user->update([
             'name' => $request->name,
-            'username' => $request->username,
         ]);
 
         if ($request->filled('password')) {
@@ -76,17 +73,17 @@ class UserController extends Controller
         }
 
         // Update profile
-        if ($user->role == 'guru' && $user->teacher) {
+        if (($user->role == 'guru' || $user->role == 'guru_mapel') && $user->teacher) {
             $request->validate([
                 'nip' => 'required|unique:teachers,nip,' . $user->teacher->id,
             ]);
+
             $user->teacher->update(['name' => $request->name, 'nip' => $request->nip]);
-        }
-        if ($user->role == 'wali_murid' && $user->parent) {
-            $user->parent->update([
-                'name' => $request->name,
-                'phone' => $request->phone,
-                'address' => $request->address
+
+            // Update User Email/Username if NIP changes
+            $user->update([
+                'email' => $request->nip . '@teacher.ac.id',
+                'username' => $request->nip
             ]);
         }
 

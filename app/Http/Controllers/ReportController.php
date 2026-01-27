@@ -25,6 +25,14 @@ class ReportController extends Controller
                     $q->where('class_id', $classId);
                 });
             }
+        } elseif ($user->role == 'guru_mapel') {
+            // Guru Mapel sees all for now, or we could filter by 'recorded_by' if they only want to see their own scans.
+            // User said "Samakan saja... melihat histori". Wali kelas sees *their class*.
+            // Guru Mapel teaches *many classes*.
+            // Let's allow them to see ALL for now so it's not empty, or maybe filter by what THEY scanned?
+            // "Melihat histori absensi" usually implies general history.
+            // Let's leave it unfiltered for guru_mapel (global view) or maybe filter by recorded_by?
+            // Global view is safer to avoid "empty" complaints.
         }
 
         $attendances = $query->latest()->get();
@@ -55,6 +63,8 @@ class ReportController extends Controller
                     $q->where('class_id', $classId);
                 });
             }
+        } elseif ($user->role == 'guru_mapel') {
+            // See all
         }
 
         $attendances = $query->get();
